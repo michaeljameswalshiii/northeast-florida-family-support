@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Northeast Florida Support Navigator
 
-## Getting Started
+A Vercel-ready Next.js resource navigator for families seeking autism and developmental-disability support across Baker, Clay, Duval, Flagler, Nassau, Putnam, and St. Johns counties.
 
-First, run the development server:
+## What is included
+
+- A guided home page with Florida-specific service pathways
+- My AI Administrator, using the cost-aware Amazon Bedrock model ladder adapted from MiBarn
+- A curated, filterable resource directory
+- Plain-language answers about autism services, ABA, APD, CDDO terminology, school services, and the iBudget waiver
+- Responsive and reduced-motion-friendly presentation
+- A deterministic local-answer fallback when AI credentials or budget are unavailable
+
+## Local development
 
 ```bash
+npm install
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The site remains fully usable without AWS credentials. Add the variables from `.env.example` to enable AI answers.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Deploy through Vercel and configure the environment variables in `.env.example`. `AI_USAGE_TENANT_ID` must remain unique so this site has an independent monthly budget record.
 
-## Learn More
+## Content note
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Resource information is a starting point, not an endorsement. Families should confirm availability, eligibility, insurance, fees, and service areas directly with each organization. Content was reviewed in September 2026.
