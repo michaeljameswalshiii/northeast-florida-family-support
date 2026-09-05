@@ -2,6 +2,8 @@
 
 A Vercel-ready Next.js resource navigator for families seeking autism and developmental-disability support across Baker, Clay, Duval, Flagler, Nassau, Putnam, and St. Johns counties.
 
+Live site: https://northeast-florida-family-support.vercel.app
+
 ## What is included
 
 - A guided home page with Florida-specific service pathways
