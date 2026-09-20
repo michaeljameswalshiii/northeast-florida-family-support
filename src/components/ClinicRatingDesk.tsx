@@ -22,7 +22,7 @@ import {
   type LocationTypeId,
   type PaymentTypeId,
 } from "@/data/idd-care-scale";
-import type { ClinicCallLog, ClinicRating, DomainScores, PaymentMatrix, PaymentNotes } from "@/lib/clinic-rating-types";
+import { CLINIC_COUNTIES, formatClinicAddress, type ClinicCallLog, type ClinicRating, type DomainScores, type PaymentMatrix, type PaymentNotes } from "@/lib/clinic-rating-types";
 
 type LoadState = { clinics: ClinicRating[]; persistLabel: string; error: string; loading: boolean };
 
@@ -31,6 +31,7 @@ const emptyCall = {
   raterName: "",
   clinicContact: "",
   clinicPhone: "",
+  clinicEmail: "",
   notes: "",
 };
 
@@ -38,7 +39,14 @@ function blankClinic(): ClinicRating {
   return {
     id: crypto.randomUUID(),
     clinicName: "",
+    street: "",
+    suite: "",
+    city: "",
+    state: "FL",
+    zip: "",
+    county: "",
     address: "",
+    email: "",
     locationTypes: [],
     scores: {},
     payment: {},
@@ -108,7 +116,7 @@ export function ClinicRatingDesk() {
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return state.clinics;
-    return state.clinics.filter((clinic) => [clinic.clinicName, clinic.address, clinic.callLog.at(-1)?.clinicContact].join(" ").toLowerCase().includes(needle));
+    return state.clinics.filter((clinic) => [clinic.clinicName, formatClinicAddress(clinic), clinic.email, clinic.city, clinic.zip, clinic.county, clinic.callLog.at(-1)?.clinicContact, clinic.callLog.at(-1)?.clinicEmail].join(" ").toLowerCase().includes(needle));
   }, [query, state.clinics]);
 
   function startNew() {
@@ -126,6 +134,7 @@ export function ClinicRatingDesk() {
       raterName: last?.raterName || "",
       clinicContact: last?.clinicContact || "",
       clinicPhone: last?.clinicPhone || "",
+      clinicEmail: last?.clinicEmail || clinic.email || "",
       notes: "",
     });
     setStatus("");
@@ -192,11 +201,14 @@ export function ClinicRatingDesk() {
         <section className="rating-card" id="call-details">
           <p className="eyebrow">This phone call</p>
           <h2>Who did you reach, and what did you hear?</h2>
-          <div className="rating-grid four">
+          <div className="rating-grid two">
             <label className="field">Call date<input type="date" value={call.date} onChange={(event) => setCall({ ...call, date: event.target.value })} /></label>
-            <label className="field">Rater / Arc staff<input value={call.raterName} onChange={(event) => setCall({ ...call, raterName: event.target.value })} placeholder="Health director name" /></label>
-            <label className="field">Clinic contact<input value={call.clinicContact} onChange={(event) => setCall({ ...call, clinicContact: event.target.value })} placeholder="Person you spoke with" /></label>
-            <label className="field">Clinic phone<input value={call.clinicPhone} onChange={(event) => setCall({ ...call, clinicPhone: event.target.value })} placeholder="904-..." /></label>
+            <label className="field">Rater / Arc staff<input value={call.raterName} onChange={(event) => setCall({ ...call, raterName: event.target.value })} placeholder="Health director name" autoComplete="name" /></label>
+          </div>
+          <div className="rating-grid three">
+            <label className="field">Clinic contact<input value={call.clinicContact} onChange={(event) => setCall({ ...call, clinicContact: event.target.value })} placeholder="Person you spoke with" autoComplete="organization-title" /></label>
+            <label className="field">Clinic phone<input type="tel" value={call.clinicPhone} onChange={(event) => setCall({ ...call, clinicPhone: event.target.value })} placeholder="904-..." autoComplete="tel" /></label>
+            <label className="field">Contact email<input type="email" value={call.clinicEmail} onChange={(event) => setCall({ ...call, clinicEmail: event.target.value })} placeholder="name@clinic.org" autoComplete="email" /></label>
           </div>
           <label className="field">Call notes<textarea value={call.notes} onChange={(event) => setCall({ ...call, notes: event.target.value })} rows={3} placeholder="Waitlists, referral rules, next follow-up, anything useful for the next call..." /></label>
         </section>
@@ -204,10 +216,22 @@ export function ClinicRatingDesk() {
         <section className="rating-card" id="clinic-details">
           <p className="eyebrow">Clinic information</p>
           <h2>Save the clinic you can reopen later.</h2>
-          <div className="rating-grid two">
-            <label className="field">Clinic name<input value={editing.clinicName} onChange={(event) => setEditing({ ...editing, clinicName: event.target.value })} required /></label>
-            <label className="field">Address / home base<input value={editing.address} onChange={(event) => setEditing({ ...editing, address: event.target.value })} placeholder="For mobile or virtual clinics, list the administrative address" /></label>
+          <label className="field">Clinic name<input value={editing.clinicName} onChange={(event) => setEditing({ ...editing, clinicName: event.target.value })} required autoComplete="organization" /></label>
+          <div className="address-grid">
+            <label className="field address-street">Street address<input value={editing.street || ""} onChange={(event) => setEditing({ ...editing, street: event.target.value })} placeholder="2101 Arc Drive" autoComplete="address-line1" /></label>
+            <label className="field address-suite">Suite / unit<input value={editing.suite || ""} onChange={(event) => setEditing({ ...editing, suite: event.target.value })} placeholder="Optional" autoComplete="address-line2" /></label>
+            <label className="field address-city">City<input value={editing.city || ""} onChange={(event) => setEditing({ ...editing, city: event.target.value })} placeholder="St. Augustine" autoComplete="address-level2" /></label>
+            <label className="field">State<input value={editing.state || "FL"} onChange={(event) => setEditing({ ...editing, state: event.target.value.toUpperCase().slice(0, 2) })} placeholder="FL" autoComplete="address-level1" maxLength={2} /></label>
+            <label className="field">ZIP<input value={editing.zip || ""} onChange={(event) => setEditing({ ...editing, zip: event.target.value })} placeholder="32084" inputMode="numeric" autoComplete="postal-code" /></label>
+            <label className="field address-county">County served
+              <select value={editing.county || ""} onChange={(event) => setEditing({ ...editing, county: event.target.value })}>
+                <option value="">Select county</option>
+                {CLINIC_COUNTIES.map((county) => <option key={county} value={county}>{county}</option>)}
+              </select>
+            </label>
+            <label className="field address-email">Clinic email<input type="email" value={editing.email || ""} onChange={(event) => setEditing({ ...editing, email: event.target.value })} placeholder="office@clinic.org" autoComplete="email" /></label>
           </div>
+          <p className="rating-lede">For mobile or virtual clinics, use the home base or administrative address. Contact email on this call can be different from the clinic office email.</p>
           <fieldset className="choice-fieldset">
             <legend>Location type <span>Check all that apply</span></legend>
             <div className="choice-pills">
@@ -382,7 +406,7 @@ export function ClinicRatingDesk() {
               {[...editing.callLog].reverse().map((entry: ClinicCallLog) => (
                 <li key={entry.id}>
                   <strong>{formatDate(entry.date)}</strong>
-                  <span>{[entry.raterName, entry.clinicContact, entry.clinicPhone].filter(Boolean).join(" · ") || "No contact details"}</span>
+                  <span>{[entry.raterName, entry.clinicContact, entry.clinicPhone, entry.clinicEmail].filter(Boolean).join(" · ") || "No contact details"}</span>
                   {entry.notes ? <p>{entry.notes}</p> : null}
                 </li>
               ))}
@@ -448,10 +472,11 @@ export function ClinicRatingDesk() {
                     <h3>{clinic.clinicName}</h3>
                   </div>
                 </div>
-                <p className="resource-description">{clinic.address || "No address recorded yet."}</p>
+                <p className="resource-description">{formatClinicAddress(clinic) || "No address recorded yet."}</p>
                 <dl>
                   <div><dt>Rated</dt><dd>{summary.rated} of {DOMAINS.length} domains</dd></div>
                   <div><dt>Last call</dt><dd>{lastCall ? `${formatDate(lastCall.date)}${lastCall.clinicContact ? ` · ${lastCall.clinicContact}` : ""}` : "No call logged"}</dd></div>
+                  <div><dt>Email</dt><dd>{clinic.email || lastCall?.clinicEmail || "Not recorded"}</dd></div>
                   <div><dt>Setting</dt><dd>{clinic.locationTypes.length ? clinic.locationTypes.join(", ") : "Not specified"}</dd></div>
                 </dl>
                 <div className="resource-actions">

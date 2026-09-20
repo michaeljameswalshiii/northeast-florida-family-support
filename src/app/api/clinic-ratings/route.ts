@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ clinic, persistLabel: clinicRatingsPersistLabel() });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to save this clinic rating.";
-    const status = message.includes("clinic name") ? 400 : 500;
+    const status = /clinic name|email/i.test(message) ? 400 : 500;
     return NextResponse.json({ error: message }, { status });
   }
 }

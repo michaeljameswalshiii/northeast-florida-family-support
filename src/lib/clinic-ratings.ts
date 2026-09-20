@@ -3,7 +3,7 @@ import path from "node:path";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { ANCHORS, DOMAINS, type AnchorId, type CoverageGapId, type LocationTypeId, type PaymentTypeId, type ServiceLineId } from "@/data/idd-care-scale";
-import type { ClinicCallLog, ClinicRating, ClinicRatingInput, DomainScores, PaymentMatrix, PaymentNotes } from "@/lib/clinic-rating-types";
+import { formatClinicAddress, type ClinicCallLog, type ClinicRating, type ClinicRatingInput, type DomainScores, type PaymentMatrix, type PaymentNotes } from "@/lib/clinic-rating-types";
 import { bedrockConfigured } from "@/lib/bedrock";
 
 export type { ClinicCallLog, ClinicRating, ClinicRatingInput, DomainScores, PaymentMatrix, PaymentNotes } from "@/lib/clinic-rating-types";
@@ -46,6 +46,21 @@ function sanitizeText(value: unknown, max = 400) {
 
 function sanitizeMultiline(value: unknown, max = 4000) {
   return String(value || "").trim().slice(0, max);
+}
+
+function sanitizeState(value: unknown) {
+  const state = sanitizeText(value, 2).toUpperCase();
+  return state || "FL";
+}
+
+function sanitizeZip(value: unknown) {
+  const digits = String(value || "").replace(/\D/g, "").slice(0, 9);
+  if (digits.length <= 5) return digits;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
+
+function sanitizeEmail(value: unknown) {
+  return String(value || "").trim().toLowerCase().slice(0, 120);
 }
 
 const ANCHOR_IDS = new Set(ANCHORS.map((anchor) => anchor.id));
@@ -104,6 +119,7 @@ function sanitizeCallLog(value: unknown): ClinicCallLog[] {
     raterName: sanitizeText((entry as ClinicCallLog)?.raterName, 120),
     clinicContact: sanitizeText((entry as ClinicCallLog)?.clinicContact, 120),
     clinicPhone: sanitizeText((entry as ClinicCallLog)?.clinicPhone, 40),
+    clinicEmail: sanitizeEmail((entry as ClinicCallLog)?.clinicEmail),
     notes: sanitizeMultiline((entry as ClinicCallLog)?.notes, 2000),
     savedAt: sanitizeText((entry as ClinicCallLog)?.savedAt, 40),
   }));
@@ -113,14 +129,25 @@ function publicClinic(record: ClinicRating): ClinicRating {
   const clinic = { ...(record as StoredRecord) };
   delete (clinic as Partial<StoredRecord>).PK;
   delete (clinic as Partial<StoredRecord>).SK;
-  return clinic;
+  const street = clinic.street || (!clinic.city && clinic.address ? clinic.address : "");
+  const hydrated = {
+    ...clinic,
+    street,
+    suite: clinic.suite || "",
+    city: clinic.city || "",
+    state: clinic.state || "FL",
+    zip: clinic.zip || "",
+    county: clinic.county || "",
+    email: clinic.email || "",
+  };
+  return { ...hydrated, address: formatClinicAddress(hydrated) };
 }
 
 function normalizeInput(input: ClinicRatingInput, previous?: ClinicRating): ClinicRating {
   const now = new Date().toISOString();
   const callLog = sanitizeCallLog(input.callLog || previous?.callLog || []);
   const call = input.call;
-  const hasCall = call && (call.date || call.raterName || call.clinicContact || call.clinicPhone || call.notes);
+  const hasCall = call && (call.date || call.raterName || call.clinicContact || call.clinicPhone || call.clinicEmail || call.notes);
   if (hasCall && call) {
     callLog.push({
       id: crypto.randomUUID(),
@@ -128,14 +155,26 @@ function normalizeInput(input: ClinicRatingInput, previous?: ClinicRating): Clin
       raterName: sanitizeText(call.raterName, 120),
       clinicContact: sanitizeText(call.clinicContact, 120),
       clinicPhone: sanitizeText(call.clinicPhone, 40),
+      clinicEmail: sanitizeEmail(call.clinicEmail),
       notes: sanitizeMultiline(call.notes, 2000),
       savedAt: now,
     });
   }
-  return {
+  const street = sanitizeText(input.street, 160) || (!sanitizeText(input.city, 80) ? sanitizeText(input.address, 240) : "");
+  const email = sanitizeEmail(input.email);
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Enter a valid clinic email, or leave it blank.");
+  const contactEmail = sanitizeEmail(call?.clinicEmail);
+  if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) throw new Error("Enter a valid contact email, or leave it blank.");
+  const next = {
     id: sanitizeText(input.id, 80) || previous?.id || crypto.randomUUID(),
     clinicName: sanitizeText(input.clinicName, 160),
-    address: sanitizeText(input.address, 240),
+    street,
+    suite: sanitizeText(input.suite, 80),
+    city: sanitizeText(input.city, 80),
+    state: sanitizeState(input.state),
+    zip: sanitizeZip(input.zip),
+    county: sanitizeText(input.county, 40),
+    email,
     locationTypes: sanitizeLocationTypes(input.locationTypes),
     scores: sanitizeScores(input.scores),
     payment: sanitizePayment(input.payment),
@@ -146,6 +185,7 @@ function normalizeInput(input: ClinicRatingInput, previous?: ClinicRating): Clin
     createdAt: previous?.createdAt || now,
     updatedAt: now,
   };
+  return { ...next, address: formatClinicAddress(next) };
 }
 
 async function readLocal(): Promise<ClinicRating[]> {

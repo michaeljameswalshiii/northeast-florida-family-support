@@ -275,7 +275,13 @@ p { margin: 0; }
 .rating-lede, .rating-card > p:not(.eyebrow) { color: var(--muted); max-width: 760px; }
 .rating-grid { display: grid; gap: 14px; }
 .rating-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.rating-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .rating-grid.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.address-grid { display: grid; grid-template-columns: 1.5fr .7fr .55fr .85fr; gap: 14px; }
+.address-street { grid-column: 1 / 4; }
+.address-suite { grid-column: 4; }
+.address-city { grid-column: 1 / 3; }
+.address-county, .address-email { grid-column: span 2; }
 .field { display: grid; gap: 7px; color: var(--ink); font-size: .72rem; font-weight: 800; }
 .field input, .field textarea, .field select, .payment-table input:not([type="checkbox"]) { width: 100%; border: 1px solid var(--line); border-radius: 12px; background: #fbfdfc; padding: 11px 12px; color: var(--ink); font-weight: 500; }
 .field textarea { resize: vertical; }
@@ -337,7 +343,9 @@ p { margin: 0; }
 @media (max-width: 980px) {
   .header-row { flex-wrap: wrap; }
   .site-header nav { display: flex; flex-wrap: wrap; width: 100%; order: 3; gap: 8px 18px; padding-bottom: 12px; }
-  .rating-grid.two, .rating-grid.four, .rating-summary-card { grid-template-columns: 1fr 1fr; }
+  .rating-grid.two, .rating-grid.three, .rating-grid.four, .rating-summary-card { grid-template-columns: 1fr 1fr; }
+  .address-grid { grid-template-columns: 1fr 1fr; }
+  .address-street, .address-suite, .address-city, .address-county, .address-email { grid-column: auto; }
   .hero-grid { grid-template-columns: 1fr; padding-top: 70px; }
   .hero-copy { text-align: center; }
   .hero-copy .eyebrow, .hero-trust, .hero-actions { justify-content: center; }
@@ -388,7 +396,7 @@ p { margin: 0; }
   .resource-actions { align-items: flex-start; flex-direction: column; }
   .footer-grid { grid-template-columns: 1fr; gap: 30px; }
   .footer-fineprint { flex-direction: column; }
-  .rating-grid.two, .rating-grid.four, .rating-summary-card, .rating-summary-card dl, .anchor-cards { grid-template-columns: 1fr; }
+  .rating-grid.two, .rating-grid.three, .rating-grid.four, .rating-summary-card, .rating-summary-card dl, .anchor-cards, .address-grid { grid-template-columns: 1fr; }
   .rating-card { padding: 20px; }
   .rating-jump { width: 100%; order: 3; }
   .pay-check { width: 100%; justify-content: flex-start; padding: 8px 10px; }

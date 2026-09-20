@@ -10,6 +10,7 @@ export type ClinicCallLog = {
   raterName: string;
   clinicContact: string;
   clinicPhone: string;
+  clinicEmail: string;
   notes: string;
   savedAt: string;
 };
@@ -17,7 +18,14 @@ export type ClinicCallLog = {
 export type ClinicRating = {
   id: string;
   clinicName: string;
+  street: string;
+  suite: string;
+  city: string;
+  state: string;
+  zip: string;
+  county: string;
   address: string;
+  email: string;
   locationTypes: LocationTypeId[];
   scores: DomainScores;
   payment: PaymentMatrix;
@@ -28,6 +36,15 @@ export type ClinicRating = {
   createdAt: string;
   updatedAt: string;
 };
+
+export const CLINIC_COUNTIES = ["Baker", "Clay", "Duval", "Flagler", "Nassau", "Putnam", "St. Johns", "Outside Northeast Florida"] as const;
+
+export function formatClinicAddress(clinic: Partial<Pick<ClinicRating, "street" | "suite" | "city" | "state" | "zip" | "county" | "address">>) {
+  const line1 = [clinic.street, clinic.suite].filter(Boolean).join(", ");
+  const cityLine = [clinic.city, [clinic.state, clinic.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+  const county = clinic.county && clinic.county !== "Outside Northeast Florida" ? `${clinic.county} County` : clinic.county;
+  return [line1, cityLine, county].filter(Boolean).join(" · ") || clinic.address || "";
+}
 
 export type ClinicRatingInput = Omit<ClinicRating, "createdAt" | "updatedAt" | "callLog"> & {
   callLog?: ClinicCallLog[];
