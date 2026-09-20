@@ -16,6 +16,7 @@ export function SiteFooter() {
           <p className="footer-label">Explore</p>
           <Link href="/#ask">Ask My AI Administrator</Link>
           <Link href="/resources">Resource directory</Link>
+          <Link href="/clinic-ratings">Clinic ratings</Link>
           <Link href="/#answers">Common questions</Link>
         </div>
         <div>
