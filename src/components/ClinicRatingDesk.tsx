@@ -19,7 +19,6 @@ import {
   PAYMENT_GROUPS,
   SERVICE_LINES,
   type AnchorId,
-  type DomainId,
   type LocationTypeId,
   type PaymentTypeId,
 } from "@/data/idd-care-scale";
@@ -77,7 +76,6 @@ export function ClinicRatingDesk() {
   const [call, setCall] = useState(emptyCall);
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState("");
-  const [openDomain, setOpenDomain] = useState<DomainId | "">("");
 
   async function loadClinics() {
     try {
@@ -117,7 +115,6 @@ export function ClinicRatingDesk() {
     setEditing(blankClinic());
     setCall({ ...emptyCall, date: new Date().toISOString().slice(0, 10) });
     setStatus("");
-    setOpenDomain("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -132,7 +129,6 @@ export function ClinicRatingDesk() {
       notes: "",
     });
     setStatus("");
-    setOpenDomain("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -177,6 +173,12 @@ export function ClinicRatingDesk() {
       <div className="rating-desk">
         <div className="rating-toolbar">
           <button type="button" className="text-link" onClick={() => setEditing(null)}><ArrowLeft size={16} /> All clinics</button>
+          <nav className="rating-jump" aria-label="Form sections">
+            <a href="#call-details">Call</a>
+            <a href="#clinic-details">Clinic</a>
+            <a href="#domain-scores">Scores</a>
+            <a href="#payment-access">Payment</a>
+          </nav>
           <div className="rating-toolbar-actions">
             <button type="button" className="button secondary" onClick={() => window.print()}><Printer size={16} /> Print</button>
             <button type="button" className="button primary" onClick={() => void saveClinic()} disabled={saving}>
@@ -185,33 +187,34 @@ export function ClinicRatingDesk() {
           </div>
         </div>
 
-        {status ? <p className={status.startsWith("Saved") ? "rating-status is-ok" : "form-error"}>{status}</p> : null}
+        {status ? <p className={status.startsWith("Saved") ? "rating-status is-ok" : "form-error"} role="status">{status}</p> : null}
 
-        <section className="rating-card">
+        <section className="rating-card" id="call-details">
           <p className="eyebrow">This phone call</p>
-          <h2>Log the outreach, then score what you heard.</h2>
+          <h2>Who did you reach, and what did you hear?</h2>
           <div className="rating-grid four">
-            <label>Call date<input type="date" value={call.date} onChange={(event) => setCall({ ...call, date: event.target.value })} /></label>
-            <label>Rater / Arc staff<input value={call.raterName} onChange={(event) => setCall({ ...call, raterName: event.target.value })} placeholder="Health director name" /></label>
-            <label>Clinic contact<input value={call.clinicContact} onChange={(event) => setCall({ ...call, clinicContact: event.target.value })} placeholder="Person you spoke with" /></label>
-            <label>Clinic phone<input value={call.clinicPhone} onChange={(event) => setCall({ ...call, clinicPhone: event.target.value })} placeholder="904-..." /></label>
+            <label className="field">Call date<input type="date" value={call.date} onChange={(event) => setCall({ ...call, date: event.target.value })} /></label>
+            <label className="field">Rater / Arc staff<input value={call.raterName} onChange={(event) => setCall({ ...call, raterName: event.target.value })} placeholder="Health director name" /></label>
+            <label className="field">Clinic contact<input value={call.clinicContact} onChange={(event) => setCall({ ...call, clinicContact: event.target.value })} placeholder="Person you spoke with" /></label>
+            <label className="field">Clinic phone<input value={call.clinicPhone} onChange={(event) => setCall({ ...call, clinicPhone: event.target.value })} placeholder="904-..." /></label>
           </div>
-          <label className="full-label">Call notes<textarea value={call.notes} onChange={(event) => setCall({ ...call, notes: event.target.value })} rows={3} placeholder="What you learned, next follow-up, waitlists, referral rules..." /></label>
+          <label className="field">Call notes<textarea value={call.notes} onChange={(event) => setCall({ ...call, notes: event.target.value })} rows={3} placeholder="Waitlists, referral rules, next follow-up, anything useful for the next call..." /></label>
         </section>
 
-        <section className="rating-card">
+        <section className="rating-card" id="clinic-details">
           <p className="eyebrow">Clinic information</p>
+          <h2>Save the clinic you can reopen later.</h2>
           <div className="rating-grid two">
-            <label>Clinic name<input value={editing.clinicName} onChange={(event) => setEditing({ ...editing, clinicName: event.target.value })} required /></label>
-            <label>Address / home base<input value={editing.address} onChange={(event) => setEditing({ ...editing, address: event.target.value })} placeholder="For mobile or virtual clinics, list the administrative address" /></label>
+            <label className="field">Clinic name<input value={editing.clinicName} onChange={(event) => setEditing({ ...editing, clinicName: event.target.value })} required /></label>
+            <label className="field">Address / home base<input value={editing.address} onChange={(event) => setEditing({ ...editing, address: event.target.value })} placeholder="For mobile or virtual clinics, list the administrative address" /></label>
           </div>
-          <fieldset className="chip-fieldset">
-            <legend>Location type — check all that apply</legend>
-            <div className="chip-row">
+          <fieldset className="choice-fieldset">
+            <legend>Location type <span>Check all that apply</span></legend>
+            <div className="choice-pills">
               {LOCATION_TYPES.map((item) => {
                 const checked = editing.locationTypes.includes(item.id);
                 return (
-                  <label key={item.id} className={checked ? "is-on" : ""}>
+                  <label key={item.id} className={`choice-pill${checked ? " is-on" : ""}`}>
                     <input
                       type="checkbox"
                       checked={checked}
@@ -222,7 +225,7 @@ export function ClinicRatingDesk() {
                           : [...editing.locationTypes, item.id as LocationTypeId],
                       })}
                     />
-                    {item.label}
+                    <span>{item.label}</span>
                   </label>
                 );
               })}
@@ -230,11 +233,11 @@ export function ClinicRatingDesk() {
           </fieldset>
         </section>
 
-        <section className="rating-card rating-summary-card">
+        <section className="rating-card rating-summary-card" id="domain-scores">
           <div>
             <p className="eyebrow">Scoring snapshot</p>
-            <h2>{summary.points} / {summary.max} points</h2>
-            <p>{summary.rated} of {DOMAINS.length} domains rated. Select the anchor that matches typical observed practice, not aspirational policy.</p>
+            <h2>{summary.points} / {summary.max}</h2>
+            <p>{summary.rated} of {DOMAINS.length} domains rated. Choose the anchor that matches typical observed practice, not aspirational policy.</p>
           </div>
           <dl>
             {ANCHORS.map((anchor) => (
@@ -247,24 +250,12 @@ export function ClinicRatingDesk() {
         </section>
 
         <section className="rating-card">
-          <p className="eyebrow">Scale anchors</p>
-          <div className="anchor-guide">
-            {ANCHORS.map((anchor) => (
-              <article key={anchor.id}>
-                <strong>{anchor.label}</strong>
-                <p>{anchor.meaning}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section className="rating-card">
           <p className="eyebrow">Rating scale</p>
           <h2>Nine domains of integrated IDD care</h2>
+          <p className="rating-lede">Tap one card per domain. The description stays visible so you can score while you are still on the call.</p>
           <div className="domain-list">
             {DOMAINS.map((domain) => {
               const selected = editing.scores[domain.id];
-              const open = openDomain === domain.id;
               return (
                 <article className="domain-card" key={domain.id}>
                   <header>
@@ -272,38 +263,34 @@ export function ClinicRatingDesk() {
                       <p className="eyebrow">Domain {domain.number}</p>
                       <h3>{domain.title}</h3>
                     </div>
-                    <button type="button" onClick={() => setOpenDomain(open ? "" : domain.id)}>{open ? "Hide descriptions" : "Show descriptions"}</button>
+                    <span className={`domain-selected${selected ? " is-set" : ""}`}>
+                      {selected ? ANCHORS.find((anchor) => anchor.id === selected)?.label : "Not rated"}
+                    </span>
                   </header>
-                  <div className="anchor-choices">
+                  <div className="anchor-cards" role="radiogroup" aria-label={domain.title}>
                     {ANCHORS.map((anchor) => (
-                      <label key={anchor.id} className={selected === anchor.id ? "is-on" : ""}>
+                      <label key={anchor.id} className={`anchor-card${selected === anchor.id ? " is-on" : ""}`}>
                         <input
                           type="radio"
                           name={domain.id}
                           checked={selected === anchor.id}
                           onChange={() => setEditing({ ...editing, scores: { ...editing.scores, [domain.id]: anchor.id } })}
                         />
-                        <span>{anchor.label}</span>
+                        <strong>{anchor.label}</strong>
+                        <span>{domain.anchors[anchor.id]}</span>
                       </label>
                     ))}
                   </div>
-                  {open ? (
-                    <div className="anchor-copy">
-                      {ANCHORS.map((anchor) => (
-                        <p key={anchor.id}><strong>{anchor.label}.</strong> {domain.anchors[anchor.id]}</p>
-                      ))}
-                    </div>
-                  ) : null}
                 </article>
               );
             })}
           </div>
         </section>
 
-        <section className="rating-card">
+        <section className="rating-card" id="payment-access">
           <p className="eyebrow">Domain 9 supplement</p>
           <h2>Payment methods accepted</h2>
-          <p className="rating-lede">For each payment type, check every service line where the clinic accepts it for patients with IDD. Leave blank if it is not accepted or the service is not offered.</p>
+          <p className="rating-lede">For each payment type, mark every service line the clinic accepts for patients with IDD. Leave a box blank if it is not accepted or the service is not offered.</p>
           <div className="payment-table-wrap">
             <table className="payment-table">
               <thead>
@@ -324,7 +311,7 @@ export function ClinicRatingDesk() {
                           const checked = Boolean(editing.payment[item.id as PaymentTypeId]?.[line.id]);
                           return (
                             <td key={line.id}>
-                              <label>
+                              <label className={`pay-check${checked ? " is-on" : ""}`}>
                                 <input
                                   type="checkbox"
                                   checked={checked}
@@ -337,6 +324,7 @@ export function ClinicRatingDesk() {
                                   }}
                                   aria-label={`${item.label} for ${line.label}`}
                                 />
+                                <span>{line.label}</span>
                               </label>
                             </td>
                           );
@@ -358,13 +346,13 @@ export function ClinicRatingDesk() {
               </tbody>
             </table>
           </div>
-          <fieldset className="chip-fieldset">
-            <legend>When coverage is not accepted, lapses, or does not cover a needed service, the clinic typically</legend>
-            <div className="chip-stack">
+          <fieldset className="choice-fieldset">
+            <legend>When coverage is not accepted, lapses, or does not cover a needed service, the clinic typically <span>Check all that apply</span></legend>
+            <div className="choice-list">
               {COVERAGE_GAP_OPTIONS.map((item) => {
                 const checked = editing.coverageGaps.includes(item.id);
                 return (
-                  <label key={item.id} className={checked ? "is-on" : ""}>
+                  <label key={item.id} className={`choice-row${checked ? " is-on" : ""}`}>
                     <input
                       type="checkbox"
                       checked={checked}
@@ -375,12 +363,14 @@ export function ClinicRatingDesk() {
                           : [...editing.coverageGaps, item.id],
                       })}
                     />
-                    {item.label}
+                    <span>{item.label}</span>
                   </label>
                 );
               })}
             </div>
-            <label className="full-label">Other / details<input value={editing.coverageGapOther} onChange={(event) => setEditing({ ...editing, coverageGapOther: event.target.value })} /></label>
+            {editing.coverageGaps.includes("other") ? (
+              <label className="field">Other / details<input value={editing.coverageGapOther} onChange={(event) => setEditing({ ...editing, coverageGapOther: event.target.value })} placeholder="Describe the other response" /></label>
+            ) : null}
           </fieldset>
         </section>
 
@@ -400,11 +390,17 @@ export function ClinicRatingDesk() {
           </section>
         ) : null}
 
-        <div className="rating-toolbar sticky-end">
-          <button type="button" className="button secondary" onClick={() => void removeClinic(editing.id)}><Trash2 size={16} /> Delete clinic</button>
-          <button type="button" className="button primary" onClick={() => void saveClinic()} disabled={saving}>
-            {saving ? <LoaderCircle className="spin" size={16} /> : <Save size={16} />} Save this call
-          </button>
+        <div className="rating-sticky">
+          <div>
+            <strong>{summary.rated} of {DOMAINS.length} domains rated</strong>
+            <span>{summary.points} / {summary.max} points</span>
+          </div>
+          <div className="rating-toolbar-actions">
+            <button type="button" className="button secondary" onClick={() => void removeClinic(editing.id)}><Trash2 size={16} /> Delete</button>
+            <button type="button" className="button primary" onClick={() => void saveClinic()} disabled={saving}>
+              {saving ? <LoaderCircle className="spin" size={16} /> : <Save size={16} />} Save this call
+            </button>
+          </div>
         </div>
       </div>
     );
