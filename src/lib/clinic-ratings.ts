@@ -2,7 +2,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
-import { ANCHORS, DOMAINS, type AnchorId, type CoverageGapId, type LocationTypeId, type PaymentTypeId, type ServiceLineId } from "@/data/idd-care-scale";
+import { ACCESSIBILITY_FEATURES, ANCHORS, DOMAINS, type AccessibilityFeatureId, type AnchorId, type CoverageGapId, type LocationTypeId, type PaymentTypeId, type ServiceLineId } from "@/data/idd-care-scale";
+import { deletePhotosForClinic, listClinicPhotos, sanitizePhotoMeta } from "@/lib/clinic-photos";
 import { formatClinicAddress, type ClinicCallLog, type ClinicRating, type ClinicRatingInput, type DomainScores, type PaymentMatrix, type PaymentNotes } from "@/lib/clinic-rating-types";
 import { bedrockConfigured } from "@/lib/bedrock";
 
@@ -111,6 +112,11 @@ function sanitizeCoverageGaps(value: unknown): CoverageGapId[] {
     .filter((item) => input.includes(item));
 }
 
+function sanitizeAccessibilityFeatures(value: unknown): AccessibilityFeatureId[] {
+  const input = Array.isArray(value) ? value.map(String) : [];
+  return ACCESSIBILITY_FEATURES.map((item) => item.id).filter((item) => input.includes(item));
+}
+
 function sanitizeCallLog(value: unknown): ClinicCallLog[] {
   if (!Array.isArray(value)) return [];
   return value.slice(-40).map((entry) => ({
@@ -139,6 +145,9 @@ function publicClinic(record: ClinicRating): ClinicRating {
     zip: clinic.zip || "",
     county: clinic.county || "",
     email: clinic.email || "",
+    accessibilityFeatures: clinic.accessibilityFeatures || [],
+    accessibilityNotes: clinic.accessibilityNotes || "",
+    photos: clinic.photos || [],
   };
   return { ...hydrated, address: formatClinicAddress(hydrated) };
 }
@@ -147,7 +156,7 @@ function normalizeInput(input: ClinicRatingInput, previous?: ClinicRating): Clin
   const now = new Date().toISOString();
   const callLog = sanitizeCallLog(input.callLog || previous?.callLog || []);
   const call = input.call;
-  const hasCall = call && (call.date || call.raterName || call.clinicContact || call.clinicPhone || call.clinicEmail || call.notes);
+  const hasCall = call && (call.raterName || call.clinicContact || call.clinicPhone || call.clinicEmail || call.notes);
   if (hasCall && call) {
     callLog.push({
       id: crypto.randomUUID(),
@@ -176,6 +185,9 @@ function normalizeInput(input: ClinicRatingInput, previous?: ClinicRating): Clin
     county: sanitizeText(input.county, 40),
     email,
     locationTypes: sanitizeLocationTypes(input.locationTypes),
+    accessibilityFeatures: sanitizeAccessibilityFeatures(input.accessibilityFeatures),
+    accessibilityNotes: sanitizeMultiline(input.accessibilityNotes, 1200),
+    photos: sanitizePhotoMeta(input.photos || previous?.photos || []),
     scores: sanitizeScores(input.scores),
     payment: sanitizePayment(input.payment),
     paymentNotes: sanitizePaymentNotes(input.paymentNotes),
@@ -220,15 +232,24 @@ export async function listClinicRatings() {
 }
 
 export async function getClinicRating(id: string) {
+  let clinic: ClinicRating | null = null;
   if (dynamoEnabled()) {
     const result = await client.send(new GetCommand({ TableName: TABLE, Key: { PK: pk(), SK: sk(id) } }));
-    return result.Item ? publicClinic(result.Item as ClinicRating) : null;
-  }
-  if (localFileEnabled()) {
+    clinic = result.Item ? publicClinic(result.Item as ClinicRating) : null;
+  } else if (localFileEnabled()) {
     const clinics = await readLocal();
-    return clinics.find((clinic) => clinic.id === id) || null;
+    const found = clinics.find((item) => item.id === id);
+    clinic = found ? publicClinic(found) : null;
+  } else {
+    throw new Error("Clinic ratings storage is not configured.");
   }
-  throw new Error("Clinic ratings storage is not configured.");
+  if (!clinic) return null;
+  try {
+    clinic.photos = await listClinicPhotos(id);
+  } catch {
+    clinic.photos = clinic.photos || [];
+  }
+  return clinic;
 }
 
 export async function saveClinicRating(input: ClinicRatingInput) {
@@ -253,6 +274,7 @@ export async function saveClinicRating(input: ClinicRatingInput) {
 }
 
 export async function deleteClinicRating(id: string) {
+  await deletePhotosForClinic(id).catch(() => undefined);
   if (dynamoEnabled()) {
     await client.send(new DeleteCommand({ TableName: TABLE, Key: { PK: pk(), SK: sk(id) } }));
     return;

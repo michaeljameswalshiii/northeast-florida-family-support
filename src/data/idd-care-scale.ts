@@ -35,6 +35,31 @@ export const LOCATION_TYPES = [
 
 export type LocationTypeId = (typeof LOCATION_TYPES)[number]["id"];
 
+export const ACCESSIBILITY_FEATURES = [
+  { id: "ada_parking", label: "Accessible parking close to the entrance" },
+  { id: "ramp_or_level", label: "Ramp or level entrance (no stairs required)" },
+  { id: "automatic_doors", label: "Automatic or easy-open doors" },
+  { id: "wide_halls", label: "Wide hallways and turning space for wheelchairs" },
+  { id: "accessible_restroom", label: "Accessible restroom" },
+  { id: "accessible_exam", label: "Accessible exam table, dental chair, or lift" },
+  { id: "sensory_room", label: "Sensory-friendly or quiet room" },
+  { id: "low_sensory_lighting", label: "Adjustable or low-sensory lighting / sound" },
+  { id: "visual_supports", label: "Visual supports, social stories, or picture schedules" },
+  { id: "aac_welcome", label: "AAC and other communication supports are welcome" },
+  { id: "asl_interpreter", label: "ASL interpreter available" },
+  { id: "wait_accommodations", label: "Wait-time accommodations (wait in car, short wait, first-roomed)" },
+  { id: "other", label: "Other (describe in notes)" },
+] as const;
+
+export type AccessibilityFeatureId = (typeof ACCESSIBILITY_FEATURES)[number]["id"];
+
+export const CLINIC_PHOTO_KINDS = [
+  { id: "facility", label: "Facility" },
+  { id: "accessibility", label: "Accessibility feature" },
+] as const;
+
+export type ClinicPhotoKind = (typeof CLINIC_PHOTO_KINDS)[number]["id"];
+
 export const SERVICE_LINES = [
   { id: "medical", label: "Medical" },
   { id: "dental", label: "Dental" },

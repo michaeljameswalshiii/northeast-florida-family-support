@@ -1,4 +1,4 @@
-import type { AnchorId, CoverageGapId, DomainId, LocationTypeId, PaymentTypeId, ServiceLineId } from "@/data/idd-care-scale";
+import type { AccessibilityFeatureId, AnchorId, ClinicPhotoKind, CoverageGapId, DomainId, LocationTypeId, PaymentTypeId, ServiceLineId } from "@/data/idd-care-scale";
 
 export type DomainScores = Partial<Record<DomainId, AnchorId>>;
 export type PaymentMatrix = Partial<Record<PaymentTypeId, Partial<Record<ServiceLineId, boolean>>>>;
@@ -15,6 +15,14 @@ export type ClinicCallLog = {
   savedAt: string;
 };
 
+export type ClinicPhoto = {
+  id: string;
+  kind: ClinicPhotoKind;
+  caption: string;
+  contentType: string;
+  createdAt: string;
+};
+
 export type ClinicRating = {
   id: string;
   clinicName: string;
@@ -27,6 +35,9 @@ export type ClinicRating = {
   address: string;
   email: string;
   locationTypes: LocationTypeId[];
+  accessibilityFeatures: AccessibilityFeatureId[];
+  accessibilityNotes: string;
+  photos: ClinicPhoto[];
   scores: DomainScores;
   payment: PaymentMatrix;
   paymentNotes: PaymentNotes;
