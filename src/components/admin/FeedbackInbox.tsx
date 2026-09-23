@@ -4,7 +4,7 @@ import Image from "next/image";
 import { FileText, Inbox, Mail, Monitor, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { feedbackFileUrl, isImageType, type FeedbackRecord } from "@/lib/resource-feedback";
+import { feedbackFileUrl, isImageType, type FeedbackRecord } from "@/lib/feedback-view";
 
 function kindLabel(type: string) {
   if (type === "tech-support" || type === "site") return "Tech support";

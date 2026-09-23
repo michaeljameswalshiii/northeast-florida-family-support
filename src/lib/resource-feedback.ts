@@ -3,6 +3,10 @@ import path from "node:path";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { bedrockConfigured } from "@/lib/bedrock";
+import type { FeedbackImage, FeedbackRecord } from "@/lib/feedback-view";
+
+export type { FeedbackImage, FeedbackRecord } from "@/lib/feedback-view";
+export { feedbackFileUrl, isImageType } from "@/lib/feedback-view";
 
 const TABLE = process.env.DYNAMODB_BEDROCK_USAGE_TABLE || "turnkey-bedrock-usage";
 const TENANT = process.env.AI_USAGE_TENANT_ID || "site-nefl-support";
@@ -27,42 +31,12 @@ const ALLOWED_TYPES = new Set([
   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ]);
 
-export type FeedbackImage = {
-  id: string;
-  name: string;
-  contentType: string;
-  data: string;
-  createdAt: string;
-};
-
-export type FeedbackRecord = {
-  id: string;
-  type: string;
-  page: string;
-  resource: string;
-  issue: string;
-  details: string;
-  contact: string;
-  images: FeedbackImage[];
-  createdAt: string;
-  status: string;
-  emailStatus?: string;
-};
-
 function text(value: unknown, max: number) {
   return String(value || "").trim().slice(0, max);
 }
 
 function pk() {
   return `TENANT#${TENANT}`;
-}
-
-export function isImageType(contentType: string) {
-  return contentType.startsWith("image/");
-}
-
-export function feedbackFileUrl(noteId: string, fileId: string) {
-  return `/api/resource-feedback/${encodeURIComponent(noteId)}/files/${encodeURIComponent(fileId)}`;
 }
 
 function sanitizeFiles(value: unknown): FeedbackImage[] {
