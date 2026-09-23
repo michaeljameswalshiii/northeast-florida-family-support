@@ -35,10 +35,10 @@ Production: https://northeast-florida-family-support.vercel.app
 
 Deploy through Vercel (`npx vercel --prod`) and configure the environment variables in `.env.example`. `AI_USAGE_TENANT_ID` must remain unique so this site has an independent monthly budget record. Auto-deploy from GitHub requires the Vercel GitHub app: https://github.com/apps/vercel
 
-Set `STAFF_ACCESS_PASSWORD` to a strong unique staff password and
-`STAFF_SESSION_SECRET` to a random value of at least 32 characters. The staff
-feedback inbox stays locked when either value is missing. Clinic ratings are
-public.
+Set `OFFICE_ADMIN_USERNAME` / `OFFICE_ADMIN_PASSWORD` for the platform admin
+email login, plus `OFFICE_USERNAME` / `OFFICE_PASSWORD` for site staff.
+`STAFF_SESSION_SECRET` must be a random value of at least 32 characters.
+The admin desk is at `/admin`. Clinic ratings remain public.
 
 Tech support notes are stored alongside the other site records in DynamoDB and
 emailed to `FEEDBACK_TO_EMAIL` (default `michaeljameswalshiii@gmail.com`). If

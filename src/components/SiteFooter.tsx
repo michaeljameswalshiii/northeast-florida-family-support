@@ -23,7 +23,7 @@ export function SiteFooter() {
           <Link href="/privacy">Privacy</Link>
           <Link href="/accessibility">Accessibility</Link>
           <Link href="/terms">Terms</Link>
-          <Link href="/admin">Admin notes</Link>
+          <Link href="/admin">Admin</Link>
         </div>
         <div>
           <p className="footer-label">Need a person?</p>

@@ -1,39 +1,44 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
+
 const COOKIE_NAME = "nefl_staff_session";
-const SESSION_SECONDS = 60 * 60 * 8;
+const SESSION_SECONDS = 60 * 60 * 12;
 
-function bytesToBase64Url(bytes: Uint8Array) {
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-}
-
-function textToBase64Url(value: string) {
-  return bytesToBase64Url(new TextEncoder().encode(value));
-}
-
-function base64UrlToText(value: string) {
-  const base64 = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
-  const binary = atob(base64);
-  return new TextDecoder().decode(Uint8Array.from(binary, (character) => character.charCodeAt(0)));
-}
+type StaffAccount = { username: string; password: string; role: "admin" | "staff" };
+type StaffSession = { email: string; role: "admin" | "staff"; exp: number };
 
 function secret() {
-  return process.env.STAFF_SESSION_SECRET?.trim() || "";
+  return process.env.STAFF_SESSION_SECRET?.trim() || process.env.OFFICE_SESSION_SECRET?.trim() || "";
 }
 
-async function signature(payload: string) {
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret()),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  return bytesToBase64Url(new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(payload))));
+function normalizeId(value: string) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function safeEqual(left: string, right: string) {
+  const a = Buffer.from(left);
+  const b = Buffer.from(right);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
+
+function sign(payload: string) {
+  return createHmac("sha256", secret()).update(payload).digest("base64url");
+}
+
+function staffAccounts(): StaffAccount[] {
+  const accounts: StaffAccount[] = [];
+  const adminUser = process.env.OFFICE_ADMIN_USERNAME?.trim() || "";
+  const adminPass = process.env.OFFICE_ADMIN_PASSWORD?.trim() || "";
+  if (adminUser && adminPass) accounts.push({ username: adminUser, password: adminPass, role: "admin" });
+
+  const staffUser = process.env.OFFICE_USERNAME?.trim() || process.env.STAFF_EMAIL?.trim() || "navigator";
+  const staffPass = process.env.OFFICE_PASSWORD?.trim() || process.env.STAFF_ACCESS_PASSWORD?.trim() || "";
+  if (staffPass) accounts.push({ username: staffUser, password: staffPass, role: "staff" });
+  return accounts;
 }
 
 export function staffAuthConfigured() {
-  return Boolean(process.env.STAFF_ACCESS_PASSWORD?.trim() && secret().length >= 32);
+  return secret().length >= 32 && staffAccounts().length > 0;
 }
 
 export function staffCookieName() {
@@ -43,43 +48,63 @@ export function staffCookieName() {
 export function staffCookieOptions() {
   return {
     httpOnly: true,
-    sameSite: "strict" as const,
+    sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: SESSION_SECONDS,
   };
 }
 
-export async function createStaffSession() {
+export async function verifyStaffLogin(username: string, password: string) {
+  const id = normalizeId(username);
+  if (!id || !password || !staffAuthConfigured()) return null;
+  for (const account of staffAccounts()) {
+    if (safeEqual(normalizeId(account.username), id) && safeEqual(account.password, password)) {
+      return { email: normalizeId(account.username), role: account.role };
+    }
+  }
+  return null;
+}
+
+export async function createStaffSession(email: string, role: "admin" | "staff" = "staff") {
   if (!staffAuthConfigured()) throw new Error("Staff access is not configured.");
-  const payload = textToBase64Url(JSON.stringify({ exp: Date.now() + SESSION_SECONDS * 1000 }));
-  return `${payload}.${await signature(payload)}`;
+  const payload = Buffer.from(JSON.stringify({ email: normalizeId(email), role, exp: Date.now() + SESSION_SECONDS * 1000 })).toString("base64url");
+  return `${payload}.${sign(payload)}`;
+}
+
+export async function readStaffSession(value?: string): Promise<StaffSession | null> {
+  if (!staffAuthConfigured() || !value) return null;
+  const [payload, suppliedSignature, extra] = value.split(".");
+  if (!payload || !suppliedSignature || extra) return null;
+  const expected = sign(payload);
+  if (!safeEqual(suppliedSignature, expected)) return null;
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as StaffSession;
+    if (!parsed.email || typeof parsed.exp !== "number" || parsed.exp <= Date.now()) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
 }
 
 export async function verifyStaffSession(value?: string) {
-  if (!staffAuthConfigured() || !value) return false;
-  const [payload, suppliedSignature, extra] = value.split(".");
-  if (!payload || !suppliedSignature || extra) return false;
-  const expectedSignature = await signature(payload);
-  if (suppliedSignature.length !== expectedSignature.length) return false;
-  let mismatch = 0;
-  for (let index = 0; index < suppliedSignature.length; index += 1) {
-    mismatch |= suppliedSignature.charCodeAt(index) ^ expectedSignature.charCodeAt(index);
-  }
-  if (mismatch !== 0) return false;
-  try {
-    const parsed = JSON.parse(base64UrlToText(payload)) as { exp?: number };
-    return typeof parsed.exp === "number" && parsed.exp > Date.now();
-  } catch {
-    return false;
-  }
+  return Boolean(await readStaffSession(value));
 }
 
 export async function requestHasStaffSession(request: Request) {
-  const cookie = request.headers.get("cookie")
+  const raw = request.headers.get("cookie")
     ?.split(";")
     .map((item) => item.trim())
     .find((item) => item.startsWith(`${COOKIE_NAME}=`))
     ?.slice(COOKIE_NAME.length + 1);
-  return verifyStaffSession(cookie);
+  if (!raw) return false;
+  try {
+    return verifyStaffSession(decodeURIComponent(raw));
+  } catch {
+    return verifyStaffSession(raw);
+  }
+}
+
+export function configuredLoginIds() {
+  return staffAccounts().map((account) => ({ username: account.username, role: account.role }));
 }
