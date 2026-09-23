@@ -18,7 +18,7 @@ export default function SupportPage() {
           <h1>Tech support notes</h1>
           <p className="simple-lede">
             This navigator is in beta. Send a note if something does not work, a clinic form gets stuck, or a page looks wrong.
-            You can attach screenshots. Every note is saved in the admin inbox and emailed to the project team.
+            You can attach screenshots or documents. Every note is saved in the admin inbox and emailed to the project team.
           </p>
           <TechSupportForm />
         </div>

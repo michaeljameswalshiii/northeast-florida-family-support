@@ -29,7 +29,11 @@ The site remains fully usable without AWS credentials. Add the variables from `.
 
 ## Deployment
 
-Deploy through Vercel and configure the environment variables in `.env.example`. `AI_USAGE_TENANT_ID` must remain unique so this site has an independent monthly budget record.
+GitHub: https://github.com/michaeljameswalshiii/northeast-florida-family-support
+
+Production: https://northeast-florida-family-support.vercel.app
+
+Deploy through Vercel (`npx vercel --prod`) and configure the environment variables in `.env.example`. `AI_USAGE_TENANT_ID` must remain unique so this site has an independent monthly budget record. Auto-deploy from GitHub requires the Vercel GitHub app: https://github.com/apps/vercel
 
 Set `STAFF_ACCESS_PASSWORD` to a strong unique staff password and
 `STAFF_SESSION_SECRET` to a random value of at least 32 characters. The staff
