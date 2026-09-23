@@ -31,6 +31,14 @@ import { CLINIC_COUNTIES, formatClinicAddress, type ClinicCallLog, type ClinicPh
 
 type LoadState = { clinics: ClinicRating[]; persistLabel: string; error: string; loading: boolean };
 
+const FORM_STEPS = [
+  { id: "call-details", label: "Call" },
+  { id: "clinic-details", label: "Clinic" },
+  { id: "facility-access", label: "Photos" },
+  { id: "domain-scores", label: "Scores" },
+  { id: "payment-access", label: "Payment" },
+];
+
 const emptyCall = {
   date: new Date().toISOString().slice(0, 10),
   raterName: "",
@@ -297,12 +305,13 @@ export function ClinicRatingDesk() {
           <button type="button" className="text-link" onClick={() => {
             if (!hasUnsavedChanges || window.confirm("Discard unsaved changes and return to all clinics?")) setEditing(null);
           }}><ArrowLeft size={16} /> All clinics</button>
-          <nav className="rating-jump" aria-label="Form sections">
-            <a href="#call-details">Call</a>
-            <a href="#clinic-details">Clinic</a>
-            <a href="#facility-access">Photos</a>
-            <a href="#domain-scores">Scores</a>
-            <a href="#payment-access">Payment</a>
+          <nav className="rating-steps" aria-label="Form sections">
+            {FORM_STEPS.map((step, index) => (
+              <a href={`#${step.id}`} key={step.id}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                {step.label}
+              </a>
+            ))}
           </nav>
           <div className="rating-toolbar-actions">
             <button type="button" className="button secondary" onClick={() => window.print()}><Printer size={16} /> Print</button>
@@ -313,6 +322,18 @@ export function ClinicRatingDesk() {
         </div>
 
         {status ? <p className={status.startsWith("Saved") ? "rating-status is-ok" : "form-error"} role="status">{status}</p> : null}
+
+        {!editing.callLog.length ? (
+          <section className="rating-card clinic-start-card">
+            <div className="clinic-start-copy">
+              <p className="eyebrow">New clinic</p>
+              <h2>Capture the clinic first, then score the call.</h2>
+              <p>Name, address, photos, and access features stay with this record. Domain scores can wait until the conversation gives you enough evidence.</p>
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/clinic-exterior.jpg" alt="" width={640} height={360} />
+          </section>
+        ) : null}
 
         <section className="rating-card" id="call-details">
           <p className="eyebrow">This phone call</p>
@@ -642,18 +663,20 @@ export function ClinicRatingDesk() {
           <span>Search clinics</span>
           <div><Search size={17} /><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Clinic name, address, or contact" /></div>
         </label>
-        <button type="button" className="button primary" onClick={startNew}><ClipboardPlus size={18} /> Log a clinic call</button>
+        <button type="button" className="button primary" onClick={startNew}><ClipboardPlus size={18} /> Add a clinic</button>
       </div>
 
       {state.loading ? <p className="rating-status">Loading saved clinics…</p> : null}
       {state.error ? <p className="form-error">{state.error}</p> : null}
 
       {!state.loading && !filtered.length ? (
-        <div className="empty-state">
+        <div className="empty-state clinic-empty">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/clinic-exterior.jpg" alt="" width={960} height={540} />
           <Phone size={28} />
-          <h3>No clinic ratings yet</h3>
-          <p>Start the first record while you are on the phone with a potential specialty clinic.</p>
-          <button type="button" onClick={startNew}>Log a clinic call</button>
+          <h3>Add the first clinic</h3>
+          <p>Start the record with clinic details and facility photos, then score integrated care while you are still on the call.</p>
+          <button type="button" onClick={startNew}>Add a clinic</button>
         </div>
       ) : (
         <div className="resource-cards rating-cards">

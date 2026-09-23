@@ -18,18 +18,24 @@ export default async function ClinicRatingsPage() {
   if (!(await verifyStaffSession(session))) redirect("/staff-login");
   return (
     <main id="main-content">
-      <section className="directory-hero">
+      <section className="directory-hero clinic-hero">
         <div className="directory-orb one" />
         <div className="directory-orb two" />
-        <div className="shell">
-          <Link href="/" className="back-link"><ArrowLeft size={16} /> Back to navigator</Link>
-          <p className="eyebrow"><ClipboardCheck size={15} /> Arc St. Johns clinic calls</p>
-          <h1>Rate integrated care <em>while you are on the phone.</em></h1>
-          <p>
-            Use this scale after or during a call with a potential medical, dental, or vision clinic.
-            Open an existing clinic to update the same record the next time you call.
-          </p>
-          <div className="staff-hero-actions"><StaffLogoutButton /></div>
+        <div className="shell clinic-hero-grid">
+          <div>
+            <Link href="/" className="back-link"><ArrowLeft size={16} /> Back to navigator</Link>
+            <p className="eyebrow"><ClipboardCheck size={15} /> Arc St. Johns clinic calls</p>
+            <h1>Add a clinic, then rate care <em>while you are on the phone.</em></h1>
+            <p>
+              Start with the clinic name, address, photos, and access details. The nine-domain scale updates the same record after every outreach call.
+            </p>
+            <div className="staff-hero-actions"><StaffLogoutButton /></div>
+          </div>
+          <div className="clinic-hero-visual">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/clinic-exterior.jpg" alt="Accessible clinic entrance with a ramp, bench, and palm" width={1280} height={720} />
+            <span>Facility + access photos belong in the clinic record</span>
+          </div>
         </div>
       </section>
       <section className="section directory-section">
