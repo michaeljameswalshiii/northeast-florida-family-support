@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { VisitTracker } from "@/components/VisitTracker";
 
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -15,6 +16,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
       {children}
       <SiteFooter />
       <FeedbackWidget />
+      <VisitTracker />
     </>
   );
 }

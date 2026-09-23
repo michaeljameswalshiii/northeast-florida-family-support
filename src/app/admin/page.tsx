@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { ClipboardCheck, Flag, Inbox } from "lucide-react";
+import { BarChart3, ClipboardCheck, Inbox, MapPin } from "lucide-react";
 import { AdminLogin } from "@/components/admin/AdminLogin";
 import { listClinicRatings } from "@/lib/clinic-ratings";
 import { listResourceFeedback } from "@/lib/resource-feedback";
@@ -19,14 +19,14 @@ export default async function AdminHomePage() {
       <p className="eyebrow">Overview</p>
       <h1>Admin desk</h1>
       <p className="admin-lede">Review visitor notes, clinic ratings, and resource corrections in one place.</p>
-      <div className="admin-stat-grid">
+      <div className="admin-stat-grid admin-stat-grid-wide">
         <Link href="/admin/tech-support" className="admin-stat">
           <Inbox size={22} />
           <strong>{tech.length}</strong>
           <span>Tech support notes</span>
         </Link>
-        <Link href="/admin/reports" className="admin-stat">
-          <Flag size={22} />
+        <Link href="/admin/directory" className="admin-stat">
+          <Inbox size={22} />
           <strong>{reports.length}</strong>
           <span>Resource reports</span>
         </Link>
@@ -34,6 +34,16 @@ export default async function AdminHomePage() {
           <ClipboardCheck size={22} />
           <strong>{clinics.length}</strong>
           <span>Clinic ratings</span>
+        </Link>
+        <Link href="/admin/reports" className="admin-stat">
+          <BarChart3 size={22} />
+          <strong>7 / 30</strong>
+          <span>Traffic reports</span>
+        </Link>
+        <Link href="/admin/visitors" className="admin-stat">
+          <MapPin size={22} />
+          <strong>IPs</strong>
+          <span>Visitor addresses</span>
         </Link>
       </div>
     </main>

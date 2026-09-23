@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ClipboardCheck, Flag, Inbox, LayoutDashboard, LogOut, Settings } from "lucide-react";
+import { BarChart3, ClipboardCheck, Flag, Inbox, LayoutDashboard, LogOut, MapPin, Settings, Share2 } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -10,8 +10,11 @@ import { useRouter } from "next/navigation";
 const NAV = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/tech-support", label: "Tech support", icon: Inbox },
-  { href: "/admin/reports", label: "Resource reports", icon: Flag },
+  { href: "/admin/reports", label: "Reports", icon: BarChart3 },
+  { href: "/admin/visitors", label: "Visitors", icon: MapPin },
+  { href: "/admin/directory", label: "Resource reports", icon: Flag },
   { href: "/admin/clinics", label: "Clinic ratings", icon: ClipboardCheck },
+  { href: "/admin/social", label: "Social media", icon: Share2 },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

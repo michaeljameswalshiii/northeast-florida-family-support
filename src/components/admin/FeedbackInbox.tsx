@@ -1,5 +1,9 @@
+"use client";
+
 import Image from "next/image";
-import { FileText, Inbox, Mail, Monitor } from "lucide-react";
+import { FileText, Inbox, Mail, Monitor, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { feedbackFileUrl, isImageType, type FeedbackRecord } from "@/lib/resource-feedback";
 
 function kindLabel(type: string) {
@@ -16,6 +20,26 @@ export function FeedbackInbox({
   emptyTitle: string;
   emptyText: string;
 }) {
+  const router = useRouter();
+  const [busyId, setBusyId] = useState("");
+  const [error, setError] = useState("");
+
+  async function remove(id: string) {
+    if (!window.confirm("Delete this request? This cannot be undone.")) return;
+    setBusyId(id);
+    setError("");
+    try {
+      const response = await fetch(`/api/resource-feedback/${id}`, { method: "DELETE", credentials: "include" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Unable to delete this note.");
+      router.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to delete this note.");
+    } finally {
+      setBusyId("");
+    }
+  }
+
   if (!items.length) {
     return (
       <div className="empty-state">
@@ -25,8 +49,10 @@ export function FeedbackInbox({
       </div>
     );
   }
+
   return (
     <div className="feedback-inbox">
+      {error ? <p className="form-error">{error}</p> : null}
       {items.map((item) => {
         const pictures = item.images.filter((file) => isImageType(file.contentType));
         const documents = item.images.filter((file) => !isImageType(file.contentType));
@@ -37,7 +63,12 @@ export function FeedbackInbox({
                 <span className="feedback-kind">{kindLabel(item.type)}</span>
                 <h3>{item.issue}</h3>
               </div>
-              <time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}</time>
+              <div className="feedback-record-meta">
+                <time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}</time>
+                <button type="button" className="text-link" onClick={() => void remove(item.id)} disabled={busyId === item.id}>
+                  <Trash2 size={15} /> {busyId === item.id ? "Deleting…" : "Delete"}
+                </button>
+              </div>
             </header>
             <p>{item.details}</p>
             <dl>

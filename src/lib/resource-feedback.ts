@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { bedrockConfigured } from "@/lib/bedrock";
 
 const TABLE = process.env.DYNAMODB_BEDROCK_USAGE_TABLE || "turnkey-bedrock-usage";
@@ -174,6 +174,40 @@ function fileFromItem(item: Record<string, unknown>): FeedbackImage {
     data: String(item.data || ""),
     createdAt: String(item.createdAt || ""),
   };
+}
+
+export async function deleteResourceFeedback(id: string) {
+  if (bedrockConfigured()) {
+    const notes = await client.send(new QueryCommand({
+      TableName: TABLE,
+      KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
+      ExpressionAttributeValues: { ":pk": pk(), ":sk": "RESOURCE_FEEDBACK#" },
+    }));
+    const note = (notes.Items || []).find((item) => item.id === id);
+    if (note?.SK) {
+      await client.send(new DeleteCommand({ TableName: TABLE, Key: { PK: pk(), SK: note.SK } }));
+    }
+    const files = await client.send(new QueryCommand({
+      TableName: TABLE,
+      KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
+      ExpressionAttributeValues: { ":pk": pk(), ":sk": `FEEDBACKFILE#${id}#` },
+    }));
+    const photos = await client.send(new QueryCommand({
+      TableName: TABLE,
+      KeyConditionExpression: "PK = :pk AND begins_with(SK, :sk)",
+      ExpressionAttributeValues: { ":pk": pk(), ":sk": `FEEDBACKPHOTO#${id}#` },
+    }));
+    for (const item of [...(files.Items || []), ...(photos.Items || [])]) {
+      if (item.SK) await client.send(new DeleteCommand({ TableName: TABLE, Key: { PK: pk(), SK: item.SK } }));
+    }
+    return;
+  }
+  if (process.env.VERCEL === "1") throw new Error("Unable to delete this note.");
+  try {
+    const parsed = JSON.parse(await readFile(LOCAL_FILE, "utf8"));
+    if (!Array.isArray(parsed)) return;
+    await writeFile(LOCAL_FILE, JSON.stringify(parsed.filter((item: FeedbackRecord) => item.id !== id), null, 2));
+  } catch {}
 }
 
 export async function getFeedbackFile(noteId: string, fileId: string) {
