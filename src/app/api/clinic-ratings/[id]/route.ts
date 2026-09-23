@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteClinicRating, getClinicRating } from "@/lib/clinic-ratings";
+import { requestHasStaffSession } from "@/lib/staff-auth";
 
 export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  if (!(await requestHasStaffSession(_request))) return NextResponse.json({ error: "Staff sign-in required." }, { status: 401 });
   try {
     const { id } = await context.params;
     const clinic = await getClinicRating(id);
@@ -14,6 +16,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
 }
 
 export async function DELETE(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  if (!(await requestHasStaffSession(_request))) return NextResponse.json({ error: "Staff sign-in required." }, { status: 401 });
   try {
     const { id } = await context.params;
     await deleteClinicRating(id);

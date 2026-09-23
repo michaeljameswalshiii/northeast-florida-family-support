@@ -42,7 +42,7 @@ export function Navigator() {
         body: JSON.stringify({ question: text, county, age, history: messages.slice(-6) }),
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || "My AI Administrator could not answer right now.");
+      if (!response.ok) throw new Error(data.error || "The Support Guide could not answer right now.");
       setMessages((current) => [...current, { role: "assistant", content: data.answer, model: data.model }]);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Please try again in a moment.");
@@ -64,7 +64,7 @@ export function Navigator() {
         <div className="ai-orb"><Sparkles size={24} /></div>
         <div>
           <p className="eyebrow">Your first clear next step</p>
-          <h2 id="ask-title">Ask My AI Administrator</h2>
+          <h2 id="ask-title">Ask the Support Guide</h2>
           <p>Get a Northeast Florida answer, then connect directly with the right human organization.</p>
         </div>
         <span className="ai-status"><span /> Available now</span>
@@ -84,7 +84,7 @@ export function Navigator() {
             <article className={`chat-message is-${message.role}`} key={`${message.role}-${index}`}>
               <span className="chat-avatar">{message.role === "assistant" ? <Bot size={18} /> : <UserRound size={18} />}</span>
               <div>
-                <strong>{message.role === "assistant" ? "My AI Administrator" : "You"}</strong>
+                <strong>{message.role === "assistant" ? "Support Guide" : "You"}</strong>
                 <p>{message.content}</p>
                 {message.role === "assistant" ? (
                   <div className="message-meta">
@@ -100,7 +100,7 @@ export function Navigator() {
           {busy ? (
             <article className="chat-message is-assistant is-loading">
               <span className="chat-avatar"><Bot size={18} /></span>
-              <div><strong>My AI Administrator</strong><p><LoaderCircle className="spin" size={18} /> Finding the clearest local path…</p></div>
+              <div><strong>Support Guide</strong><p><LoaderCircle className="spin" size={18} /> Finding the clearest local path…</p></div>
             </article>
           ) : null}
         </div>
@@ -130,10 +130,14 @@ export function Navigator() {
           </label>
           <button className="send-button" type="submit" disabled={!question.trim() || busy}>
             {busy ? <LoaderCircle className="spin" size={18} /> : <Send size={18} />}
-            Ask My AI
+            Ask the guide
           </button>
         </div>
-        <p className="privacy-note">Please don’t include names, birth dates, medical record numbers, or other private information.</p>
+        <div className="ai-disclosure">
+          <strong>Guidance, not a decision.</strong>
+          <p>This automated guide may be incomplete or wrong. It cannot diagnose, determine eligibility, approve coverage, or replace advice from a clinician, school, insurer, attorney, or agency. Verify details with the organization before acting.</p>
+        </div>
+        <p className="privacy-note">Please don’t include names, birth dates, diagnoses, medical record numbers, or other private information.</p>
         {error ? <p className="form-error" role="alert">{error}</p> : null}
       </form>
     </section>

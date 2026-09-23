@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowUpRight, Check, MapPin, Phone, RotateCcw, Search, SlidersHorizontal } from "lucide-react";
+import { ArrowUpRight, Check, Flag, MapPin, Phone, RotateCcw, Search, SlidersHorizontal } from "lucide-react";
 import { AGE_GROUPS, CATEGORIES, COUNTIES, RESOURCES } from "@/data/resources";
 
 export function ResourceExplorer() {
@@ -99,11 +99,13 @@ export function ResourceExplorer() {
                   <div><dt>Ages</dt><dd>{resource.ages.join(", ")}</dd></div>
                   <div><dt>Access</dt><dd>{resource.settings.join(" · ")}</dd></div>
                   {resource.cost ? <div><dt>Cost</dt><dd>{resource.cost}</dd></div> : null}
+                  <div><dt>Verified</dt><dd>September 20, 2026</dd></div>
                 </dl>
                 <div className="resource-actions">
                   <a href={resource.url} target="_blank" rel="noreferrer">Visit website <ArrowUpRight size={16} /></a>
                   {resource.phone ? <a href={`tel:${resource.phone.replace(/[^\d+]/g, "")}`}><Phone size={15} /> {resource.phone}</a> : null}
                 </div>
+                <a className="report-link" href={`/report-resource?resource=${encodeURIComponent(resource.name)}`}><Flag size={13} /> Report outdated information</a>
               </article>
             ))}
           </div>
@@ -111,7 +113,7 @@ export function ResourceExplorer() {
           <div className="empty-state">
             <MapPin size={30} />
             <h3>No exact matches yet</h3>
-            <p>Try removing a filter or ask My AI Administrator for a broader path.</p>
+            <p>Try removing a filter or ask the Support Guide for a broader path.</p>
             <button type="button" onClick={clearFilters}>Reset all filters</button>
           </div>
         )}

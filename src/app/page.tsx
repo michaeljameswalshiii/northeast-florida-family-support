@@ -10,6 +10,8 @@ import {
   Phone,
   ShieldCheck,
   Sparkles,
+  SearchCheck,
+  Waypoints,
 } from "lucide-react";
 import { CoastalIllustration } from "@/components/CoastalIllustration";
 import { Navigator } from "@/components/Navigator";
@@ -37,7 +39,7 @@ export default function Home() {
             <h1>Disability support is complicated. <em>Your next step shouldn’t be.</em></h1>
             <p className="hero-lede">Find trusted autism and developmental-disability resources for children, adults, and families across Northeast Florida.</p>
             <div className="hero-actions">
-              <Link className="button primary" href="#ask"><Sparkles size={18} /> Ask My AI Administrator</Link>
+              <Link className="button primary" href="#ask"><Sparkles size={18} /> Ask the Support Guide</Link>
               <Link className="button secondary" href="/resources">Browse resources <ArrowRight size={18} /></Link>
             </div>
             <div className="hero-trust">
@@ -54,7 +56,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="section path-section">
+      <section className="impact-strip" aria-label="Navigator highlights"><div className="shell impact-grid">
+        <div><strong>7</strong><span>Northeast Florida counties</span></div><div><strong>3</strong><span>Pathways you can start together</span></div><div><strong>Free</strong><span>Public starting points prioritized</span></div><div><strong>One</strong><span>Clear next step at a time</span></div>
+      </div></section>
+
+      <section className="section path-section" id="pathways">
         <div className="shell">
           <div className="section-heading split-heading">
             <div><p className="eyebrow">Choose a starting point</p><h2>Three doors into the system.</h2></div>
@@ -71,6 +77,15 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <section className="section how-section" id="how-it-works"><div className="shell">
+        <div className="section-heading centered"><p className="eyebrow">How it works</p><h2>From “where do I start?” to a practical next move.</h2><p>Use the guide at your pace. You stay in control, and every recommendation points back to a real organization you can contact.</p></div>
+        <div className="how-grid">
+          <article><span><SearchCheck size={24} /></span><p className="eyebrow">Step 1</p><h3>Share the situation</h3><p>Choose an age and county, then ask a question without entering private medical information.</p></article>
+          <article><span><Waypoints size={24} /></span><p className="eyebrow">Step 2</p><h3>See the right pathways</h3><p>Understand which medical, school, insurance, and state-service routes can move in parallel.</p></article>
+          <article><span><HeartHandshake size={24} /></span><p className="eyebrow">Step 3</p><h3>Connect with a person</h3><p>Verify current details directly and contact the agency, school district, or support organization responsible.</p></article>
+        </div>
+      </div></section>
 
       <section className="section ai-section"><div className="shell"><Navigator /></div></section>
 

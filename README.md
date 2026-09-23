@@ -7,9 +7,12 @@ Live site: https://northeast-florida-family-support.vercel.app
 ## What is included
 
 - A guided home page with Florida-specific service pathways
-- My AI Administrator, using the cost-aware Amazon Bedrock model ladder adapted from MiBarn
+- An automated Support Guide, using the cost-aware Amazon Bedrock model ladder adapted from MiBarn
 - A curated, filterable resource directory
-- An electronic IDD integrated care rating scale for Arc staff to update after each specialty-clinic call
+- A password-protected electronic IDD integrated care rating scale for Arc staff to update after each specialty-clinic call
+- Resource verification dates and an outdated-information reporting form
+- A site-wide feedback form with optional screenshots, email notifications, and a staff feedback inbox
+- Privacy, accessibility, and terms pages
 - Plain-language answers about autism services, ABA, APD, CDDO terminology, school services, and the iBudget waiver
 - Responsive and reduced-motion-friendly presentation
 - A deterministic local-answer fallback when AI credentials or budget are unavailable
@@ -27,6 +30,15 @@ The site remains fully usable without AWS credentials. Add the variables from `.
 ## Deployment
 
 Deploy through Vercel and configure the environment variables in `.env.example`. `AI_USAGE_TENANT_ID` must remain unique so this site has an independent monthly budget record.
+
+Set `STAFF_ACCESS_PASSWORD` to a strong unique staff password and
+`STAFF_SESSION_SECRET` to a random value of at least 32 characters. The clinic
+rating page and APIs remain locked when either value is missing.
+
+Visitor feedback is stored alongside the other site records in DynamoDB. Set
+`FEEDBACK_TO_EMAIL` for notifications. If `RESEND_API_KEY` is not present, the
+FormSubmit fallback requires the recipient to approve its first confirmation
+email. Staff can review every submission at `/staff-feedback`.
 
 ## Content note
 

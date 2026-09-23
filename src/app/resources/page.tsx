@@ -18,7 +18,7 @@ export default function ResourcesPage() {
           <p className="eyebrow"><MapPinned size={15} /> Northeast Florida directory</p>
           <h1>Find support that fits <em>your next step.</em></h1>
           <p>Filter trusted starting points by service, county, and age. Every listing links directly to the organization responsible for current details.</p>
-          <Link href="/#ask" className="directory-ai"><Sparkles size={17} /> Not sure what to choose? Ask My AI Administrator</Link>
+          <Link href="/#ask" className="directory-ai"><Sparkles size={17} /> Not sure what to choose? Ask the Support Guide</Link>
         </div>
       </section>
       <section className="section directory-section"><div className="shell"><ResourceExplorer /></div></section>

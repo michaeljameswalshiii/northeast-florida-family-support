@@ -14,10 +14,14 @@ export function SiteFooter() {
         </div>
         <div>
           <p className="footer-label">Explore</p>
-          <Link href="/#ask">Ask My AI Administrator</Link>
+          <Link href="/#ask">Ask the Support Guide</Link>
+          <Link href="/#how-it-works">How it works</Link>
           <Link href="/resources">Resource directory</Link>
-          <Link href="/clinic-ratings">Clinic ratings</Link>
           <Link href="/#answers">Common questions</Link>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/accessibility">Accessibility</Link>
+          <Link href="/terms">Terms</Link>
+          <Link href="/staff-feedback">Staff feedback</Link>
         </div>
         <div>
           <p className="footer-label">Need a person?</p>
@@ -31,7 +35,7 @@ export function SiteFooter() {
           This independent guide does not endorse providers and is not affiliated with a government agency.
           Confirm eligibility, availability, licensing, cost, and insurance directly with each organization.
         </p>
-        <p>Information reviewed September 2026.</p>
+        <p>Resource directory reviewed September 20, 2026.</p>
       </div>
     </footer>
   );

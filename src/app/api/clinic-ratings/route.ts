@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { clinicRatingsPersistLabel, listClinicRatings, saveClinicRating } from "@/lib/clinic-ratings";
+import { requestHasStaffSession } from "@/lib/staff-auth";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  if (!(await requestHasStaffSession(request))) return NextResponse.json({ error: "Staff sign-in required." }, { status: 401 });
   try {
     const clinics = await listClinicRatings();
     return NextResponse.json({ clinics, persistLabel: clinicRatingsPersistLabel() });
@@ -12,6 +14,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  if (!(await requestHasStaffSession(request))) return NextResponse.json({ error: "Staff sign-in required." }, { status: 401 });
   try {
     const body = await request.json().catch(() => ({}));
     const clinic = await saveClinicRating(body);

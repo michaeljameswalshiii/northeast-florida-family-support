@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteClinicPhoto, getClinicPhoto, photoBytes } from "@/lib/clinic-photos";
+import { requestHasStaffSession } from "@/lib/staff-auth";
 
 export const runtime = "nodejs";
 
-export async function GET(_request: NextRequest, context: { params: Promise<{ id: string; photoId: string }> }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string; photoId: string }> }) {
+  if (!(await requestHasStaffSession(request))) return NextResponse.json({ error: "Staff sign-in required." }, { status: 401 });
   try {
     const { id, photoId } = await context.params;
     const photo = await getClinicPhoto(id, photoId);
@@ -21,7 +23,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
   }
 }
 
-export async function DELETE(_request: NextRequest, context: { params: Promise<{ id: string; photoId: string }> }) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string; photoId: string }> }) {
+  if (!(await requestHasStaffSession(request))) return NextResponse.json({ error: "Staff sign-in required." }, { status: 401 });
   try {
     const { id, photoId } = await context.params;
     await deleteClinicPhoto(id, photoId);
