@@ -6,6 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: base, priority: 1 },
     { url: `${base}/resources`, priority: .9 },
     { url: `${base}/clinic-ratings`, priority: .7 },
+    { url: `${base}/support`, priority: .6 },
     { url: `${base}/privacy`, priority: .3 },
     { url: `${base}/accessibility`, priority: .3 },
     { url: `${base}/terms`, priority: .3 },

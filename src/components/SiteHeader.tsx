@@ -17,6 +17,7 @@ export function SiteHeader() {
           <Link href="/#how-it-works">How it works</Link>
           <Link href="/resources">Find resources</Link>
           <Link href="/clinic-ratings">Clinic ratings</Link>
+          <Link href="/support">Tech support</Link>
           <Link href="/#answers">Quick answers</Link>
         </nav>
         <Link className="header-help" href="tel:211">Call 211</Link>

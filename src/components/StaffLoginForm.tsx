@@ -35,7 +35,7 @@ export function StaffLoginForm({ nextPath = "/staff-feedback" }: { nextPath?: st
     <form className="staff-login-card" onSubmit={submit}>
       <span className="staff-login-icon"><LockKeyhole size={24} /></span>
       <h1>Staff workspace access</h1>
-      <p>Sign in to review clinic ratings, call notes, and visitor feedback.</p>
+      <p>Sign in to review beta tech support notes, screenshots, and resource reports.</p>
       <label className="field">
         Staff password
         <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required autoFocus />

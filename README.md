@@ -11,7 +11,7 @@ Live site: https://northeast-florida-family-support.vercel.app
 - A curated, filterable resource directory
 - An electronic IDD integrated care rating scale for specialty-clinic outreach, with facility photos and accessibility details
 - Resource verification dates and an outdated-information reporting form
-- A site-wide feedback form with optional screenshots, email notifications, and a staff feedback inbox
+- A public beta tech-support form with optional screenshots, saved admin notes, and email to the project inbox
 - Privacy, accessibility, and terms pages
 - Plain-language answers about autism services, ABA, APD, CDDO terminology, school services, and the iBudget waiver
 - Responsive and reduced-motion-friendly presentation
@@ -36,10 +36,10 @@ Set `STAFF_ACCESS_PASSWORD` to a strong unique staff password and
 feedback inbox stays locked when either value is missing. Clinic ratings are
 public.
 
-Visitor feedback is stored alongside the other site records in DynamoDB. Set
-`FEEDBACK_TO_EMAIL` for notifications. If `RESEND_API_KEY` is not present, the
-FormSubmit fallback requires the recipient to approve its first confirmation
-email. Staff can review every submission at `/staff-feedback`.
+Tech support notes are stored alongside the other site records in DynamoDB and
+emailed to `FEEDBACK_TO_EMAIL` (default `michaeljameswalshiii@gmail.com`). If
+`RESEND_API_KEY` is not present, FormSubmit is used and the recipient must
+approve its first confirmation email. Review saved notes at `/admin`.
 
 ## Content note
 

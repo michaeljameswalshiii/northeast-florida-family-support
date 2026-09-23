@@ -56,6 +56,13 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="beta-band" aria-label="Beta tech support">
+        <div className="shell">
+          <p><strong>This navigator is in beta.</strong> If something does not work, send a tech support note — screenshots welcome.</p>
+          <Link className="button dark" href="/support">Open tech support</Link>
+        </div>
+      </section>
+
       <section className="impact-strip" aria-label="Navigator highlights"><div className="shell impact-grid">
         <div><strong>7</strong><span>Northeast Florida counties</span></div><div><strong>3</strong><span>Pathways you can start together</span></div><div><strong>Free</strong><span>Public starting points prioritized</span></div><div><strong>One</strong><span>Clear next step at a time</span></div>
       </div></section>
