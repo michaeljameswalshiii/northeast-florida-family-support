@@ -178,6 +178,27 @@ export function ClinicRatingDesk() {
     return () => { cancelled = true; };
   }, []);
 
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (!FORM_STEPS.some((step) => step.id === hash)) return;
+    const clinic = blankClinic();
+    setEditing(clinic);
+    setSavedClinicSnapshot(JSON.stringify(clinic));
+    setCall({ ...emptyCall, date: new Date().toISOString().slice(0, 10) });
+    setCallSaved(false);
+    setStatus("");
+  }, []);
+
+  useEffect(() => {
+    if (!editing) return;
+    const hash = window.location.hash.replace("#", "");
+    if (!hash) return;
+    const timer = window.setTimeout(() => {
+      document.getElementById(hash)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [editing]);
+
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
     if (!needle) return state.clinics;

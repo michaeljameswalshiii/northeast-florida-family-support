@@ -7,8 +7,8 @@ import { staffCookieName, verifyStaffSession } from "@/lib/staff-auth";
 export const metadata: Metadata = { title: "Staff sign in", robots: { index: false, follow: false } };
 
 export default async function StaffLoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  const { next = "/clinic-ratings" } = await searchParams;
-  const nextPath = next.startsWith("/") && !next.startsWith("//") ? next : "/clinic-ratings";
+  const { next = "/staff-feedback" } = await searchParams;
+  const nextPath = next.startsWith("/") && !next.startsWith("//") ? next : "/staff-feedback";
   const session = (await cookies()).get(staffCookieName())?.value;
   if (await verifyStaffSession(session)) redirect(nextPath);
   return <main id="main-content" className="staff-login-page"><StaffLoginForm nextPath={nextPath} /></main>;

@@ -1,7 +1,9 @@
+import Link from "next/link";
+
 export function CoastalIllustration() {
   return (
-    <div className="coastal-visual" aria-label="Illustrated First Coast shoreline with a lighthouse, boardwalk, and Jacksonville skyline">
-      <div className="coastal-stage">
+    <div className="coastal-visual" aria-label="Illustrated First Coast shoreline with links to start the Support Guide or browse local resources">
+      <div className="coastal-stage" aria-hidden="true">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className="coastal-art"
@@ -28,8 +30,10 @@ export function CoastalIllustration() {
           <path className="wave wave-2" d="M-80 118c90-22 140 18 220 2 90-18 140 20 230 4 90-16 140 18 250 0v56H-80z" />
         </svg>
       </div>
-      <span className="visual-note note-one">Start here</span>
-      <span className="visual-note note-two">Local answers</span>
+      <div className="coastal-actions">
+        <Link className="visual-note note-one" href="#ask">Start here</Link>
+        <Link className="visual-note note-two" href="/resources">Local answers</Link>
+      </div>
     </div>
   );
 }

@@ -17,6 +17,7 @@ export function SiteFooter() {
           <Link href="/#ask">Ask the Support Guide</Link>
           <Link href="/#how-it-works">How it works</Link>
           <Link href="/resources">Resource directory</Link>
+          <Link href="/clinic-ratings">Clinic ratings</Link>
           <Link href="/#answers">Common questions</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/accessibility">Accessibility</Link>

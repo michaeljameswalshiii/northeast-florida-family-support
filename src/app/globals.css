@@ -108,7 +108,10 @@ p { margin: 0; }
 .coastal-waves .wave { fill: rgba(255,255,255,.18); }
 .wave-1 { animation: wave-shift 9s ease-in-out infinite; }
 .wave-2 { fill: rgba(19,125,120,.16); animation: wave-shift 12s ease-in-out infinite reverse; }
-.visual-note { position: absolute; z-index: 2; border: 1px solid rgba(8,47,53,.1); border-radius: 999px; background: rgba(255,255,255,.92); box-shadow: 0 10px 26px rgba(8,47,53,.11); padding: 8px 14px; color: var(--teal); font-size: .69rem; font-weight: 800; animation: note-float 5.5s ease-in-out infinite; }
+.coastal-birds, .coastal-waves, .coastal-sun-glow, .coastal-beacon { pointer-events: none; }
+.coastal-actions { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.visual-note { position: absolute; z-index: 3; pointer-events: auto; border: 1px solid rgba(8,47,53,.1); border-radius: 999px; background: rgba(255,255,255,.92); box-shadow: 0 10px 26px rgba(8,47,53,.11); padding: 8px 14px; color: var(--teal); font-size: .69rem; font-weight: 800; animation: note-float 5.5s ease-in-out infinite; }
+.visual-note:hover { background: white; color: var(--ink-deep); transform: translateY(-2px); }
 .visual-note.note-one { left: 4%; top: 18%; }
 .visual-note.note-two { right: 5%; bottom: 16%; animation-delay: -2.4s; }
 @keyframes coastal-drift { from { transform: scale(1.02) translate(0, 0); } to { transform: scale(1.08) translate(-1.5%, 1.2%); } }
@@ -495,7 +498,8 @@ p { margin: 0; }
   .county-strip { overflow-x: auto; }
   .county-strip .shell { width: max-content; min-width: 100%; padding-inline: 16px; gap: 25px; }
   .coastal-visual { margin-top: 20px; }
-  .visual-note { display: none; }
+  .coastal-actions { position: static; display: flex; justify-content: center; gap: 10px; margin-top: 12px; pointer-events: auto; }
+  .visual-note { position: static; animation: none; }
   .split-heading { grid-template-columns: 1fr; gap: 18px; }
   .ai-head { grid-template-columns: auto 1fr; padding: 24px 20px; }
   .ai-head .ai-status { grid-column: 1 / -1; justify-self: start; }

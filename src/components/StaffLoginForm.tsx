@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { LoaderCircle, LockKeyhole } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export function StaffLoginForm({ nextPath = "/clinic-ratings" }: { nextPath?: string }) {
+export function StaffLoginForm({ nextPath = "/staff-feedback" }: { nextPath?: string }) {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
