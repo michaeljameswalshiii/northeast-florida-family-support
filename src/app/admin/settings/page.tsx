@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { PasswordResetForm } from "@/components/admin/PasswordResetForm";
 import { configuredLoginIds, readStaffSession, staffCookieName } from "@/lib/staff-auth";
 
 export default async function AdminSettingsPage() {
@@ -23,6 +24,11 @@ export default async function AdminSettingsPage() {
           ))}
         </ul>
       </div>
+      <PasswordResetForm
+        accounts={logins}
+        currentEmail={session.email}
+        isAdmin={session.role === "admin"}
+      />
     </main>
   );
 }

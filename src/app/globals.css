@@ -551,7 +551,7 @@ p { margin: 0; }
   .admin-nav nav { grid-auto-flow: column; }
   .admin-nav-foot { margin-top: 0; padding-top: 0; border-top: 0; }
   .admin-page { padding: 24px 18px 50px; }
-  .admin-stat-grid { grid-template-columns: 1fr; }
+  .admin-stat-grid, .admin-kpi-grid, .admin-split, .social-grid { grid-template-columns: 1fr; }
 }
 
 .admin-shell, .staff-login-page { font-family: var(--font-admin), "Segoe UI", sans-serif; }
@@ -581,6 +581,14 @@ p { margin: 0; }
 .admin-split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .admin-table tr.is-admin { background: #fff8e6; }
 .feedback-record-meta { display: grid; gap: 8px; justify-items: end; }
+.admin-filter-bar { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.admin-filter-bar select, .status-select select { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font: 650 .82rem var(--font-admin), sans-serif; }
+.status-select { display: grid; gap: 4px; font-size: .68rem; font-weight: 700; color: var(--muted); }
+.feedback-kind.status-open { background: #e7f3ff; color: #1d4f91; }
+.feedback-kind.status-in_progress { background: #fff4d6; color: #8a5a00; }
+.feedback-kind.status-ready { background: #e4f7ea; color: #1f7a3a; }
+.feedback-kind.status-closed { background: #eceff1; color: #546e7a; }
+.social-grid { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: 16px; }
 .admin-stat-grid-wide { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .social-hub { max-width: 1080px; }
 .social-hub header { margin-bottom: 22px; }

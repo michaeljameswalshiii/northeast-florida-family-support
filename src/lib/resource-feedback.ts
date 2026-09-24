@@ -3,7 +3,7 @@ import path from "node:path";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { bedrockConfigured } from "@/lib/bedrock";
-import type { FeedbackImage, FeedbackRecord } from "@/lib/feedback-view";
+import { normalizeNoteStatus, type FeedbackImage, type FeedbackRecord, type NoteStatus } from "@/lib/feedback-view";
 
 export type { FeedbackImage, FeedbackRecord } from "@/lib/feedback-view";
 export { feedbackFileUrl, isImageType } from "@/lib/feedback-view";
@@ -79,7 +79,7 @@ export async function saveResourceFeedback(input: Record<string, unknown>) {
     contact,
     images,
     createdAt,
-    status: "new",
+    status: "open",
   };
 
   if (bedrockConfigured()) {
@@ -148,6 +148,37 @@ function fileFromItem(item: Record<string, unknown>): FeedbackImage {
     data: String(item.data || ""),
     createdAt: String(item.createdAt || ""),
   };
+}
+
+export async function updateFeedbackStatus(id: string, status: NoteStatus) {
+  const notes = await listResourceFeedback();
+  const record = notes.find((item) => item.id === id);
+  if (!record) throw new Error("That note was not found.");
+  record.status = status;
+  if (bedrockConfigured()) {
+    await client.send(new PutCommand({
+      TableName: TABLE,
+      Item: {
+        id: record.id,
+        type: record.type,
+        page: record.page,
+        resource: record.resource,
+        issue: record.issue,
+        details: record.details,
+        contact: record.contact,
+        createdAt: record.createdAt,
+        status,
+        emailStatus: record.emailStatus,
+        imageCount: record.images.length,
+        PK: pk(),
+        SK: `RESOURCE_FEEDBACK#${record.createdAt}#${record.id}`,
+      },
+    }));
+    return record;
+  }
+  if (process.env.VERCEL === "1") throw new Error("Unable to update this note.");
+  await writeFile(LOCAL_FILE, JSON.stringify(notes, null, 2));
+  return record;
 }
 
 export async function deleteResourceFeedback(id: string) {
@@ -235,6 +266,7 @@ export async function listResourceFeedback(): Promise<FeedbackRecord[]> {
       delete record.SK;
       delete record.imageCount;
       record.images = filesByNote.get(record.id) || record.images || [];
+      record.status = normalizeNoteStatus(record.status);
       return record;
     }).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }

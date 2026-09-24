@@ -25,6 +25,24 @@ function sign(payload: string) {
   return createHmac("sha256", secret()).update(payload).digest("base64url");
 }
 
+function extraAccounts(): StaffAccount[] {
+  const extra = process.env.OFFICE_ACCOUNTS?.trim();
+  if (!extra) return [];
+  try {
+    const parsed = JSON.parse(extra) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.flatMap((row) => {
+      const record = row as { username?: string; email?: string; password?: string; role?: string };
+      const username = String(record.username || record.email || "").trim();
+      const password = String(record.password || "");
+      if (!username || !password) return [];
+      return [{ username, password, role: record.role === "admin" ? "admin" as const : "staff" as const }];
+    });
+  } catch {
+    return [];
+  }
+}
+
 function staffAccounts(): StaffAccount[] {
   const accounts: StaffAccount[] = [];
   const adminUser = process.env.OFFICE_ADMIN_USERNAME?.trim() || "";
@@ -34,6 +52,7 @@ function staffAccounts(): StaffAccount[] {
   const staffUser = process.env.OFFICE_USERNAME?.trim() || process.env.STAFF_EMAIL?.trim() || "navigator";
   const staffPass = process.env.OFFICE_PASSWORD?.trim() || process.env.STAFF_ACCESS_PASSWORD?.trim() || "";
   if (staffPass) accounts.push({ username: staffUser, password: staffPass, role: "staff" });
+  accounts.push(...extraAccounts());
   return accounts;
 }
 
@@ -58,11 +77,16 @@ export function staffCookieOptions() {
 export async function verifyStaffLogin(username: string, password: string) {
   const id = normalizeId(username);
   if (!id || !password || !staffAuthConfigured()) return null;
-  for (const account of staffAccounts()) {
-    if (safeEqual(normalizeId(account.username), id) && safeEqual(account.password, password)) {
-      return { email: normalizeId(account.username), role: account.role };
+  const accounts = staffAccounts();
+  const known = accounts.find((account) => safeEqual(normalizeId(account.username), id));
+  if (!known) return null;
+  try {
+    const { passwordMatchesOverride } = await import("@/lib/staff-passwords");
+    if (await passwordMatchesOverride(id, password)) {
+      return { email: id, role: known.role };
     }
-  }
+  } catch {}
+  if (safeEqual(known.password, password)) return { email: id, role: known.role };
   return null;
 }
 

@@ -23,13 +23,14 @@ function emailBody(record: {
 }) {
   const files = Array.isArray(record.images) ? record.images : [];
   return [
-    "A beta tech-support note was submitted on the Northeast Florida Support Navigator.",
+    "A new tech-support note was opened on the Northeast Florida Support Navigator.",
+    "Status: Open",
     `Type: ${record.issue || ""}`,
     `Details: ${record.details || ""}`,
     `Contact: ${record.contact || "Not provided"}`,
     `Page: ${record.page || record.resource || "Not provided"}`,
     `Attachments: ${files.length ? files.map((file) => file.name || file.contentType || "file").join(", ") : "None"}`,
-    `Review the saved note: ${SITE}/admin`,
+    `Open the note: ${SITE}/admin/tech-support`,
   ].join("\n\n");
 }
 
@@ -115,7 +116,7 @@ export async function sendFeedbackEmail(record: {
   resource?: string;
   images?: Array<{ name?: string; contentType?: string }>;
 }) {
-  const subject = `NEFL Navigator tech support: ${record.issue || "New note"}`;
+  const subject = `NEFL Navigator tech support opened: ${record.issue || "New note"}`;
   const text = emailBody(record);
   if (await sendWithResend(subject, text)) return "resend";
   if (await sendWithSes(subject, text)) return "ses";

@@ -15,6 +15,7 @@ export default async function AdminTechSupportPage() {
       <p className="admin-lede">{notes.length} saved {notes.length === 1 ? "note" : "notes"}. New submissions also email the project inbox.</p>
       <FeedbackInbox
         items={notes}
+        enableStatus
         emptyTitle="No tech support notes yet"
         emptyText="When visitors send a beta note, it will appear here with screenshots and documents."
       />

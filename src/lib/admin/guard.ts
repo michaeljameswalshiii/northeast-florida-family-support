@@ -11,5 +11,5 @@ export async function getAdminSession() {
   const value = (await cookies()).get(staffCookieName())?.value;
   const session = await readStaffSession(value);
   if (!session) return { ok: false as const };
-  return { ok: true as const, email: session.email };
+  return { ok: true as const, email: session.email, role: session.role };
 }
