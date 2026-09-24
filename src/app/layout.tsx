@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { Fraunces, IBM_Plex_Sans, Manrope } from "next/font/google";
+import { IBM_Plex_Sans, Source_Serif_4 } from "next/font/google";
 import { SiteChrome } from "@/components/SiteChrome";
 import "./globals.css";
 
-const display = Fraunces({ subsets: ["latin"], variable: "--font-display" });
-const sans = Manrope({ subsets: ["latin"], variable: "--font-sans" });
-const adminSans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-admin" });
+const display = Source_Serif_4({ subsets: ["latin"], variable: "--font-display" });
+const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://northeast-florida-family-support.vercel.app"),
@@ -23,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${adminSans.variable}`} data-scroll-behavior="smooth">
+    <html lang="en" className={`${display.variable} ${sans.variable}`} data-scroll-behavior="smooth">
       <body>
         <a className="skip-link" href="#main-content">Skip to content</a>
         <SiteChrome>{children}</SiteChrome>

@@ -149,36 +149,111 @@ export function SocialHubClient() {
       </header>
       <section className="social-grid">
         <form onSubmit={savePost} className="admin-card">
-          <h2 className="text-base font-semibold text-slate-900">New post</h2>
-          <label className="mt-4 block text-sm font-medium text-slate-700">Post text<textarea value={body} onChange={(e) => setBody(e.target.value)} rows={7} placeholder="Share an update with patients…" className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20" required /></label>
-          <div className="mt-4">
-            <p className="text-sm font-medium text-slate-700">Photo or video <span className="font-normal text-slate-400">(optional)</span></p>
-            <input ref={fileInput} onChange={(event) => chooseMedia(event.target.files?.[0])} type="file" accept="image/jpeg,image/png,image/gif,video/mp4" className="sr-only" id="social-media-upload" />
-            {!mediaFile ? (
-              <button type="button" onClick={() => fileInput.current?.click()} className="mt-1.5 w-full rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-600 hover:border-teal-500 hover:bg-teal-50">
-                <span className="block font-semibold text-teal-700">Choose a photo or MP4 video</span>
-                <span className="mt-1 block text-xs text-slate-500">JPG, PNG, GIF up to 20 MB · MP4 up to 500 MB</span>
-              </button>
-            ) : (
-              <div className="mt-1.5 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                {mediaFile.type.startsWith("image/") ? <img src={mediaPreview} alt="Selected upload preview" className="max-h-72 w-full object-contain bg-slate-100" /> : <video src={mediaPreview} controls preload="metadata" className="max-h-72 w-full bg-black" />}
-                <div className="flex items-center justify-between gap-3 px-3 py-2.5 text-xs">
-                  <span className="min-w-0 truncate text-slate-600">{mediaFile.name} · {(mediaFile.size / 1024 / 1024).toFixed(1)} MB</span>
-                  <button type="button" onClick={() => { setMediaFile(null); if (fileInput.current) fileInput.current.value = ""; }} className="shrink-0 font-semibold text-rose-600 hover:text-rose-500">Remove</button>
-                </div>
+          <h2>New post</h2>
+          <label className="field">Post text
+            <textarea value={body} onChange={(event) => setBody(event.target.value)} rows={7} placeholder="Share an update with families…" required />
+          </label>
+          <p className="field-label">Photo or video <span>(optional)</span></p>
+          <input ref={fileInput} onChange={(event) => chooseMedia(event.target.files?.[0])} type="file" accept="image/jpeg,image/png,image/gif,video/mp4" className="sr-only" />
+          {!mediaFile ? (
+            <button type="button" className="social-drop" onClick={() => fileInput.current?.click()}>
+              <strong>Choose a photo or MP4 video</strong>
+              <span>JPG, PNG, GIF up to 20 MB · MP4 up to 500 MB</span>
+            </button>
+          ) : (
+            <div className="social-preview">
+              {mediaFile.type.startsWith("image/") ? <img src={mediaPreview} alt="Selected upload preview" /> : <video src={mediaPreview} controls preload="metadata" />}
+              <div>
+                <span>{mediaFile.name} · {(mediaFile.size / 1024 / 1024).toFixed(1)} MB</span>
+                <button type="button" onClick={() => { setMediaFile(null); if (fileInput.current) fileInput.current.value = ""; }}>Remove</button>
               </div>
-            )}
-            {!mediaFile && <label className="mt-3 block text-xs font-medium text-slate-500">Or use a public media link<input value={mediaUrl} onChange={(e) => setMediaUrl(e.target.value)} type="url" placeholder="https://…" className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm font-normal text-slate-900 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20" /></label>}
-          </div>
-          <fieldset className="mt-5"><legend className="text-sm font-medium text-slate-700">Publish to</legend><div className="mt-2 grid gap-2 sm:grid-cols-2">{(Object.keys(labels) as Platform[]).map((platform) => <label key={platform} className="flex items-center justify-between rounded-xl border border-slate-200 px-3 py-2.5 text-sm"><span className="flex items-center gap-2"><input type="checkbox" checked={selected.includes(platform)} onChange={() => toggle(platform)} className="h-4 w-4 accent-teal-600" />{labels[platform]}</span><span className={`text-[11px] font-semibold ${configured[platform] ? "text-emerald-600" : "text-amber-600"}`}>{configured[platform] ? "Configured" : "Needs setup"}</span></label>)}</div></fieldset>
-          {saving && mediaFile && uploadProgress > 0 && <div className="mt-4"><div className="mb-1 flex justify-between text-xs text-slate-500"><span>Uploading media to LinkedIn</span><span>{uploadProgress}%</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-teal-600 transition-all" style={{ width: `${uploadProgress}%` }} /></div></div>}
-          {message && <p className="mt-4 rounded-xl bg-teal-50 px-3 py-2 text-sm text-teal-800">{message}</p>}
-          <button disabled={saving || !selected.length} className="mt-5 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-500 disabled:opacity-50">{saving ? mediaFile && uploadProgress < 100 ? "Uploading…" : "Publishing…" : selected.includes("linkedin") && connected.linkedin ? mediaFile ? "Upload & post to LinkedIn" : "Post to LinkedIn" : "Publish"}</button>
+            </div>
+          )}
+          {!mediaFile ? (
+            <label className="field">Or use a public media link
+              <input value={mediaUrl} onChange={(event) => setMediaUrl(event.target.value)} type="url" placeholder="https://" />
+            </label>
+          ) : null}
+          <fieldset className="social-platforms">
+            <legend>Publish to</legend>
+            {(Object.keys(labels) as Platform[]).map((platform) => (
+              <label key={platform}>
+                <span>
+                  <input type="checkbox" checked={selected.includes(platform)} onChange={() => toggle(platform)} />
+                  {labels[platform]}
+                </span>
+                <em className={configured[platform] ? "is-ready" : ""}>{configured[platform] ? "Configured" : "Needs setup"}</em>
+              </label>
+            ))}
+          </fieldset>
+          {saving && mediaFile && uploadProgress > 0 ? (
+            <div className="social-progress">
+              <span>Uploading media to LinkedIn</span>
+              <b>{uploadProgress}%</b>
+              <i><b style={{ width: `${uploadProgress}%` }} /></i>
+            </div>
+          ) : null}
+          {message ? <p className="admin-banner">{message}</p> : null}
+          <button className="button primary" disabled={saving || !selected.length} type="submit">
+            {saving ? (mediaFile && uploadProgress < 100 ? "Uploading…" : "Publishing…") : "Publish"}
+          </button>
         </form>
-        <aside className="admin-card"><h2>Account connections</h2><p className="mt-1 text-sm leading-relaxed text-slate-600">Set up each developer app once, then connect the account by signing in on the platform. Passwords never enter this site.</p><div className="mt-4 space-y-2">{(Object.keys(labels) as Platform[]).map((platform) => <div key={platform} className="rounded-lg bg-white px-3 py-2.5 text-sm"><div className="flex items-center justify-between gap-2"><span className="font-medium">{labels[platform]}</span><span className={connected[platform] ? "text-emerald-600" : configured[platform] ? "text-amber-600" : "text-slate-400"}>{connected[platform] ? "Connected" : configured[platform] ? "Ready to connect" : "Setup needed"}</span></div><div className="mt-2 flex flex-wrap items-center justify-between gap-2"><p className="text-xs text-slate-500">{connected[platform] ? "Authorization saved securely." : configured[platform] ? "The account owner can authorize access." : "Enter developer app credentials."}</p><div className="flex gap-2">{configured[platform] && <button type="button" onClick={() => { window.location.href = `/api/admin/social/connect?platform=${platform}`; }} className="rounded-lg bg-teal-600 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-teal-500">{connected[platform] ? "Reconnect" : "Connect"}</button>}<button type="button" onClick={() => { setSetupPlatform(platform); setSetupMessage(""); }} className="rounded-lg border border-teal-200 px-2.5 py-1.5 text-xs font-semibold text-teal-700 hover:bg-teal-50">{configured[platform] ? "Update" : "Set up"}</button></div></div></div>)}</div><div className="mt-4 rounded-xl border border-teal-100 bg-teal-50 px-3 py-3 text-xs leading-relaxed text-teal-900"><strong>Account owner:</strong> click Connect, sign in on the platform, and approve access. The owner’s password is never shared with us.</div></aside>
+        <aside className="admin-card">
+          <h2>Account connections</h2>
+          <p className="admin-lede">Set up each developer app once, then connect the account by signing in on the platform. Passwords never enter this site.</p>
+          {(Object.keys(labels) as Platform[]).map((platform) => (
+            <div className="social-account" key={platform}>
+              <div>
+                <strong>{labels[platform]}</strong>
+                <span className={connected[platform] ? "is-on" : configured[platform] ? "is-ready" : ""}>
+                  {connected[platform] ? "Connected" : configured[platform] ? "Ready to connect" : "Setup needed"}
+                </span>
+              </div>
+              <p>{connected[platform] ? "Authorization saved securely." : configured[platform] ? "The account owner can authorize access." : "Enter developer app credentials."}</p>
+              <div className="social-account-actions">
+                {configured[platform] ? <button type="button" className="button primary" onClick={() => { window.location.href = `/api/admin/social/connect?platform=${platform}`; }}>{connected[platform] ? "Reconnect" : "Connect"}</button> : null}
+                <button type="button" className="button secondary" onClick={() => { setSetupPlatform(platform); setSetupMessage(""); }}>{configured[platform] ? "Update" : "Set up"}</button>
+              </div>
+            </div>
+          ))}
+        </aside>
       </section>
-      {setupPlatform && <div className="fixed inset-0 z-20 flex items-center justify-center bg-slate-900/30 p-4"><form onSubmit={saveSetup} className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"><div className="flex items-start justify-between gap-4"><div><h2 className="text-lg font-semibold text-slate-900">Set up {labels[setupPlatform]}</h2><p className="mt-1 text-sm text-slate-600">Enter the developer App ID/Client ID and Secret. These are encrypted before storage.</p>{(setupPlatform === "linkedin" || setupPlatform === "facebook" || setupPlatform === "instagram") && <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600">Redirect URI Meta/LinkedIn must whitelist:<br /><code className="break-all text-[11px] text-slate-800">{`https://northeast-florida-family-support.vercel.app/api/admin/social/${setupPlatform}/callback`}</code></p>}</div><button type="button" onClick={() => setSetupPlatform(null)} className="text-slate-400 hover:text-slate-700" aria-label="Close">×</button></div><label className="mt-5 block text-sm font-medium text-slate-700">App ID / Client ID<input value={clientId} onChange={(e) => setClientId(e.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required /></label><label className="mt-4 block text-sm font-medium text-slate-700">App Secret / Client Secret<input value={clientSecret} onChange={(e) => setClientSecret(e.target.value)} type="password" autoComplete="new-password" className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" required /></label>{setupMessage && <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{setupMessage}</p>}<button className="mt-5 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-teal-500">Save encrypted setup</button></form></div>}
-      <section className="mt-8"><div className="flex items-center justify-between"><h2 className="text-lg font-semibold text-slate-900">Post history</h2><span className="text-xs text-slate-500">{posts.length} saved</span></div><div className="mt-3 space-y-3">{posts.length === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">No posts yet.</div> : posts.map((post) => <article key={post.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><div className="flex flex-wrap items-center justify-between gap-2"><div className="flex flex-wrap gap-1.5">{post.platforms.map((platform) => <span key={platform} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">{labels[platform]}</span>)}</div><span className="text-xs text-slate-500">{new Date(post.createdAt).toLocaleString()}</span></div><p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-800">{post.body}</p>{post.media && <p className="mt-2 inline-flex rounded-full bg-teal-50 px-2.5 py-1 text-xs font-medium text-teal-800">{post.media.kind === "image" ? "Photo" : "Video"}: {post.media.name}</p>}<p className="mt-3 text-xs font-semibold uppercase tracking-wide text-teal-700">{post.status}</p>{post.results && Object.keys(post.results).length > 0 ? <ul className="mt-2 space-y-1 text-xs text-slate-600">{Object.entries(post.results).map(([platform, result]) => <li key={platform}>{labels[platform as Platform] || platform}: {result.note || result.status}</li>)}</ul> : null}</article>)}</div></section>
+      {setupPlatform ? (
+        <div className="admin-modal" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setSetupPlatform(null)}>
+          <form className="admin-card" onSubmit={saveSetup}>
+            <h2>Set up {labels[setupPlatform]}</h2>
+            <p className="admin-lede">Enter the developer App ID / Client ID and Secret. These are encrypted before storage.</p>
+            {(setupPlatform === "linkedin" || setupPlatform === "facebook" || setupPlatform === "instagram") ? (
+              <p className="admin-lede">Redirect URI to whitelist:<br /><code>{`https://northeast-florida-family-support.vercel.app/api/admin/social/${setupPlatform}/callback`}</code></p>
+            ) : null}
+            <label className="field">App ID / Client ID<input value={clientId} onChange={(event) => setClientId(event.target.value)} required /></label>
+            <label className="field">App Secret / Client Secret<input value={clientSecret} onChange={(event) => setClientSecret(event.target.value)} type="password" autoComplete="new-password" required /></label>
+            {setupMessage ? <p className="form-error">{setupMessage}</p> : null}
+            <div className="admin-desk-actions">
+              <button className="button primary" type="submit">Save encrypted setup</button>
+              <button className="button secondary" type="button" onClick={() => setSetupPlatform(null)}>Cancel</button>
+            </div>
+          </form>
+        </div>
+      ) : null}
+      <section className="admin-card">
+        <h2>Post history</h2>
+        <p className="admin-lede">{posts.length} saved</p>
+        {posts.length === 0 ? <p>No posts yet.</p> : posts.map((post) => (
+          <article className="social-post" key={post.id}>
+            <header>
+              <div>{post.platforms.map((platform) => <span key={platform}>{labels[platform]}</span>)}</div>
+              <time>{new Date(post.createdAt).toLocaleString()}</time>
+            </header>
+            <p>{post.body}</p>
+            {post.media ? <em>{post.media.kind === "image" ? "Photo" : "Video"}: {post.media.name}</em> : null}
+            <strong>{post.status}</strong>
+            {post.results && Object.keys(post.results).length ? (
+              <ul>{Object.entries(post.results).map(([platform, result]) => <li key={platform}>{labels[platform as Platform] || platform}: {result.note || result.status}</li>)}</ul>
+            ) : null}
+          </article>
+        ))}
+      </section>
     </div>
   );
 }

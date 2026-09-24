@@ -1,21 +1,38 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { BarChart3, ClipboardCheck, Flag, Inbox, LayoutDashboard, LogOut, MapPin, Settings, Share2 } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 const NAV = [
-  { href: "/admin", label: "Overview", icon: LayoutDashboard },
-  { href: "/admin/tech-support", label: "Tech support", icon: Inbox },
-  { href: "/admin/reports", label: "Reports", icon: BarChart3 },
-  { href: "/admin/visitors", label: "Visitors", icon: MapPin },
-  { href: "/admin/directory", label: "Resource reports", icon: Flag },
-  { href: "/admin/clinics", label: "Clinic ratings", icon: ClipboardCheck },
-  { href: "/admin/social", label: "Social media", icon: Share2 },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  {
+    label: "Desk",
+    items: [
+      { href: "/admin", label: "Overview", icon: LayoutDashboard },
+      { href: "/admin/tech-support", label: "Tech support", icon: Inbox },
+    ],
+  },
+  {
+    label: "Insight",
+    items: [
+      { href: "/admin/reports", label: "Reports", icon: BarChart3 },
+      { href: "/admin/visitors", label: "Visitors", icon: MapPin },
+    ],
+  },
+  {
+    label: "Work",
+    items: [
+      { href: "/admin/directory", label: "Resource reports", icon: Flag },
+      { href: "/admin/clinics", label: "Clinic ratings", icon: ClipboardCheck },
+      { href: "/admin/social", label: "Social media", icon: Share2 },
+    ],
+  },
+  {
+    label: "Account",
+    items: [{ href: "/admin/settings", label: "Settings", icon: Settings }],
+  },
 ];
 
 export function AdminShell({ email, children }: { email: string; children: React.ReactNode }) {
@@ -36,27 +53,32 @@ export function AdminShell({ email, children }: { email: string; children: React
         <Link href="/admin" className="admin-brand">
           <BrandMark compact />
           <span>
-            <strong>Navigator admin</strong>
-            <small>Northeast Florida</small>
+            <strong>Navigator</strong>
+            <small>Admin desk</small>
           </span>
         </Link>
-        <nav aria-label="Admin">
-          {NAV.map((item) => {
-            const active = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
-            const Icon = item.icon;
-            return (
-              <Link key={item.href} href={item.href} className={active ? "is-on" : ""}>
-                <Icon size={18} /> {item.label}
-              </Link>
-            );
-          })}
-        </nav>
+        {NAV.map((group) => (
+          <div className="admin-nav-group" key={group.label}>
+            <p>{group.label}</p>
+            <nav aria-label={group.label}>
+              {group.items.map((item) => {
+                const active = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href);
+                const Icon = item.icon;
+                return (
+                  <Link key={item.href} href={item.href} className={active ? "is-on" : ""}>
+                    <Icon size={16} /> {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        ))}
         <div className="admin-nav-foot">
           <p>{email}</p>
           <button type="button" onClick={() => void logout()} disabled={busy}>
             <LogOut size={16} /> {busy ? "Signing out…" : "Sign out"}
           </button>
-          <Link href="/">Public site</Link>
+          <Link href="/">View public site</Link>
         </div>
       </aside>
       <div className="admin-main">{children}</div>
